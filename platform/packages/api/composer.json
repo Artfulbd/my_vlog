@@ -12,7 +12,10 @@
         "laravel": {
             "providers": [
                 "Botble\\Api\\Providers\\ApiServiceProvider"
-            ]
+            ],
+            "aliases": {
+                "ApiHelper": "Botble\\Api\\Facades\\ApiHelper"
+            }
         }
     }
 }

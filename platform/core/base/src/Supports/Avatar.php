@@ -13,7 +13,7 @@ use InvalidArgumentException;
 
 class Avatar
 {
-    protected ?string $name = null;
+    protected string|null $name = null;
 
     protected int $chars = 1;
 
@@ -251,7 +251,7 @@ class Avatar
         $this->name = $name;
     }
 
-    public function create(?string $name): self
+    public function create(string|null $name): self
     {
         $this->name = $name;
 
@@ -278,7 +278,7 @@ class Avatar
         );
     }
 
-    protected function getBorderColor(): ?string
+    protected function getBorderColor(): string|null
     {
         if ($this->borderColor == 'foreground') {
             return $this->foreground;

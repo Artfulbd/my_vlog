@@ -86,7 +86,7 @@ class ProfileController extends Controller
      */
     public function updateProfile(Request $request, BaseHttpResponse $response)
     {
-        $userId = $request->user()->id;
+        $userId = $request->user()->getKey();
 
         $validator = Validator::make($request->input(), [
             'first_name' => 'required|max:120|min:2',

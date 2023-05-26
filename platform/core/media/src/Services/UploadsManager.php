@@ -29,7 +29,7 @@ class UploadsManager
         ];
     }
 
-    public function fileMimeType(string $path): ?string
+    public function fileMimeType(string $path): string|null
     {
         if (File::extension($path) == 'jfif') {
             return 'image/jpeg';

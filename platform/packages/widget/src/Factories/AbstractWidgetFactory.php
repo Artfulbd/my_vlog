@@ -24,8 +24,6 @@ abstract class AbstractWidgetFactory
 
     public array $widgetFullParams;
 
-    public static bool $skipWidgetContainer = false;
-
     public function __construct(protected Application $app)
     {
     }
@@ -53,7 +51,7 @@ abstract class AbstractWidgetFactory
         }
 
         if (! is_subclass_of($widgetClass, AbstractWidget::class)) {
-            throw new InvalidWidgetClassException('Class "' . $widgetClass . '" must extend "' . AbstractWidget::class . '" class');
+            throw new InvalidWidgetClassException(sprintf('Class "%s" must extend "%s" class', $widgetClass, AbstractWidget::class));
         }
 
         $this->widget = new $widgetClass($this->widgetConfig);

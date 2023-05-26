@@ -5,11 +5,11 @@ namespace Botble\Setting\Supports;
 use Botble\Base\Models\BaseModel;
 use Botble\Base\Supports\Helper;
 use Botble\Setting\Models\Setting;
-use Exception;
-use Illuminate\Support\Facades\File;
-use Illuminate\Filesystem\Filesystem;
+use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Support\Arr;
 use Illuminate\Support\Collection;
+use Illuminate\Support\Facades\App;
+use Illuminate\Support\Facades\Cache;
 use UnexpectedValueException;
 
 class DatabaseSettingStore extends SettingStore
@@ -20,20 +20,16 @@ class DatabaseSettingStore extends SettingStore
     {
         parent::forget($key);
 
-        // because the database store cannot store empty arrays, remove empty
-        // arrays to keep data consistent before and after saving
         $segments = explode('.', $key);
         array_pop($segments);
 
         while ($segments) {
             $segment = implode('.', $segments);
 
-            // non-empty array - exit out of the loop
             if ($this->get($segment)) {
                 break;
             }
 
-            // remove the empty array and move on to the next segment
             $this->forget($segment);
             array_pop($segments);
         }
@@ -41,9 +37,14 @@ class DatabaseSettingStore extends SettingStore
         return $this;
     }
 
+    public function newQuery(): Builder
+    {
+        return Setting::query();
+    }
+
     protected function write(array $data): void
     {
-        $keys = Setting::pluck('key');
+        $keys = $this->newQuery()->pluck('key');
 
         $insertData = Arr::dot($data);
         $updateData = [];
@@ -59,35 +60,19 @@ class DatabaseSettingStore extends SettingStore
         }
 
         foreach ($updateData as $key => $value) {
-            Setting::where('key', $key)
+            $this->newQuery()->where('key', $key)
                 ->update(['value' => $value]);
         }
 
         if ($insertData) {
-            Setting::insert($this->prepareInsertData($insertData));
+            $this->newQuery()->insert($this->prepareInsertData($insertData));
         }
 
         if ($deleteKeys) {
-            Setting::whereIn('key', $deleteKeys)->delete();
-        }
-
-        if (config('core.setting.general.cache.enabled')) {
-            try {
-                $jsonSettingStore = new JsonSettingStore(new Filesystem());
-                $jsonSettingStore->write($data);
-            } catch (Exception $exception) {
-                info($exception->getMessage());
-            }
+            $this->newQuery()->whereIn('key', $deleteKeys)->delete();
         }
     }
 
-    /**
-     * Transforms settings data into an array ready to be inserted into the
-     * database. Call array_dot on a multidimensional array before passing it
-     * into this method!
-     *
-     * @param array $data Call array_dot on a multidimensional array before passing it into this method!
-     */
     protected function prepareInsertData(array $data): array
     {
         $dbData = [];
@@ -114,30 +99,15 @@ class DatabaseSettingStore extends SettingStore
             return [];
         }
 
-        $isSettingCacheEnabled = config('core.setting.general.cache.enabled');
-
-        if ($isSettingCacheEnabled) {
-            $jsonSettingStore = new JsonSettingStore(new Filesystem());
-            if (File::exists($jsonSettingStore->getPath())) {
-                $data = $jsonSettingStore->read();
-                if (! empty($data)) {
-                    return $data;
-                }
-            }
+        if (App::runningInConsole()) {
+            return $this->parseReadData($this->newQuery()->get());
         }
 
-        $data = $this->parseReadData(Setting::get());
-
-        if ($isSettingCacheEnabled) {
-            $jsonSettingStore->write($data);
-        }
-
-        return $data;
+        return Cache::remember($this->cacheKey, $this->settingTime, function () {
+            return $this->parseReadData($this->newQuery()->get());
+        });
     }
 
-    /**
-     * Parse data coming from the database.
-     */
     public function parseReadData(Collection|array $data): array
     {
         $results = [];
@@ -159,5 +129,28 @@ class DatabaseSettingStore extends SettingStore
         }
 
         return $results;
+    }
+
+    public function delete(array $keys = [], array $except = [])
+    {
+        if (! $keys && ! $except) {
+            return false;
+        }
+
+        $query = $this->newQuery();
+
+        if ($keys) {
+            $query = $query->whereIn('key', $keys);
+        }
+
+        if ($except) {
+            $query = $query->whereNotIn('key', $keys);
+        }
+
+        $deleted = $query->delete();
+
+        $this->clearCache();
+
+        return $deleted;
     }
 }

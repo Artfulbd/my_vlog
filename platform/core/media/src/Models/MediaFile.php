@@ -95,7 +95,7 @@ class MediaFile extends BaseModel
     protected function previewUrl(): Attribute
     {
         return Attribute::make(
-            get: function (): ?string {
+            get: function (): string|null {
                 $preview = null;
                 switch ($this->type) {
                     case 'image':

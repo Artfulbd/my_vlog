@@ -3,6 +3,7 @@
 namespace Botble\Media\Providers;
 
 use Aws\S3\S3Client;
+use Botble\Base\Facades\DashboardMenu;
 use Botble\Base\Traits\LoadAndPublishDataTrait;
 use Botble\Media\Chunks\Storage\ChunkStorage;
 use Botble\Media\Commands\ClearChunksCommand;
@@ -65,7 +66,9 @@ class MediaServiceProvider extends ServiceProvider
             );
         });
 
-        AliasLoader::getInstance()->alias('RvMedia', RvMedia::class);
+        if (! class_exists('RvMedia')) {
+            AliasLoader::getInstance()->alias('RvMedia', RvMedia::class);
+        }
     }
 
     public function boot(): void
@@ -149,6 +152,7 @@ class MediaServiceProvider extends ServiceProvider
             'endpoint' => $setting->get('media_aws_endpoint', $config->get('filesystems.disks.s3.endpoint')) ?: null,
             'use_path_style_endpoint' => $config->get('filesystems.disks.s3.use_path_style_endpoint'),
         ]);
+
         RvMedia::setDoSpacesDisk([
             'key' => $setting->get('media_do_spaces_access_key_id'),
             'secret' => $setting->get('media_do_spaces_secret_key'),
@@ -156,6 +160,7 @@ class MediaServiceProvider extends ServiceProvider
             'bucket' => $setting->get('media_do_spaces_bucket'),
             'endpoint' => $setting->get('media_do_spaces_endpoint'),
         ]);
+
         RvMedia::setWasabiDisk([
             'key' => $setting->get('media_wasabi_access_key_id'),
             'secret' => $setting->get('media_wasabi_secret_key'),
@@ -163,16 +168,16 @@ class MediaServiceProvider extends ServiceProvider
             'bucket' => $setting->get('media_wasabi_bucket'),
             'root' => $setting->get('media_wasabi_root', '/'),
         ]);
+
         RvMedia::setBunnyCdnDisk([
             'hostname' => $setting->get('media_bunnycdn_hostname'),
             'storage_zone' => $setting->get('media_bunnycdn_zone'),
-            'url' => $setting->get('media_bunnycdn_pull_zone_url'),
             'api_key' => $setting->get('media_bunnycdn_key'),
             'region' => $setting->get('media_bunnycdn_region'),
         ]);
 
         $this->app['events']->listen(RouteMatched::class, function () {
-            dashboard_menu()->registerItem([
+            DashboardMenu::registerItem([
                 'id' => 'cms-core-media',
                 'priority' => 995,
                 'parent_id' => null,

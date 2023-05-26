@@ -4,6 +4,7 @@ namespace Botble\PluginManagement\Http\Controllers;
 
 use Botble\Base\Facades\Assets;
 use Botble\Base\Facades\PageTitle;
+use Botble\Base\Http\Responses\BaseHttpResponse;
 use Botble\PluginManagement\Services\MarketplaceService;
 use Botble\PluginManagement\Services\PluginService;
 use Illuminate\Contracts\View\View;
@@ -32,7 +33,7 @@ class MarketplaceController extends Controller
         return view('packages/plugin-management::marketplace.index');
     }
 
-    public function list(Request $request): array
+    public function list(Request $request, BaseHttpResponse $httpResponse): array|BaseHttpResponse
     {
         $request->merge([
             'type' => 'plugin',
@@ -41,10 +42,16 @@ class MarketplaceController extends Controller
 
         $response = $this->marketplaceService->callApi('get', '/products', $request->input());
 
-        $data = $response->json();
-
         if ($response instanceof JsonResponse) {
-            $data = $response;
+            $data = $response->getData(true);
+        } else {
+            $data = $response->json();
+        }
+
+        if (isset($data['error']) && $data['error']) {
+            return $httpResponse
+                ->setError()
+                ->setMessage($data['message']);
         }
 
         $coreVersion = get_core_version();

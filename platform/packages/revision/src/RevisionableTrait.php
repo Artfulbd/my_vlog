@@ -300,12 +300,12 @@ trait RevisionableTrait
         return false;
     }
 
-    public function getRevisionFormattedFields(): ?array
+    public function getRevisionFormattedFields(): array|null
     {
         return $this->revisionFormattedFields;
     }
 
-    public function getRevisionFormattedFieldNames(): ?array
+    public function getRevisionFormattedFieldNames(): array|null
     {
         return $this->revisionFormattedFieldNames;
     }

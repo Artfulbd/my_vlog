@@ -39,7 +39,7 @@ class InstallController extends Controller
             return redirect()->route('installers.welcome');
         }
 
-        $phpSupportInfo = $this->requirements->checkPhpVersion(config('packages.installer.installer.core.php_version'));
+        $phpSupportInfo = $this->requirements->checkPhpVersion(get_minimum_php_version());
         $requirements = $this->requirements->check(config('packages.installer.installer.requirements'));
 
         return view('packages/installer::.requirements', compact('requirements', 'phpSupportInfo'));

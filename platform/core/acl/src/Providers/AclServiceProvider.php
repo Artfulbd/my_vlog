@@ -14,8 +14,9 @@ use Botble\ACL\Repositories\Eloquent\UserRepository;
 use Botble\ACL\Repositories\Interfaces\ActivationInterface;
 use Botble\ACL\Repositories\Interfaces\RoleInterface;
 use Botble\ACL\Repositories\Interfaces\UserInterface;
-use Botble\Base\Traits\LoadAndPublishDataTrait;
+use Botble\Base\Facades\DashboardMenu;
 use Botble\Base\Facades\EmailHandler;
+use Botble\Base\Traits\LoadAndPublishDataTrait;
 use Botble\Media\Facades\RvMedia;
 use Exception;
 use Illuminate\Routing\Events\RouteMatched;
@@ -61,16 +62,15 @@ class AclServiceProvider extends ServiceProvider
         $this->garbageCollect();
 
         $this->app['events']->listen(RouteMatched::class, function () {
-            dashboard_menu()
-                ->registerItem([
-                    'id' => 'cms-core-role-permission',
-                    'priority' => 2,
-                    'parent_id' => 'cms-core-platform-administration',
-                    'name' => 'core/acl::permissions.role_permission',
-                    'icon' => null,
-                    'url' => route('roles.index'),
-                    'permissions' => ['roles.index'],
-                ])
+            DashboardMenu::registerItem([
+                'id' => 'cms-core-role-permission',
+                'priority' => 2,
+                'parent_id' => 'cms-core-platform-administration',
+                'name' => 'core/acl::permissions.role_permission',
+                'icon' => null,
+                'url' => route('roles.index'),
+                'permissions' => ['roles.index'],
+            ])
                 ->registerItem([
                     'id' => 'cms-core-user',
                     'priority' => 3,

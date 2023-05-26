@@ -1,5 +1,5 @@
-$(document).ready(function () {
-    'use strict';
+$(document).ready(function() {
+    'use strict'
     let icons = [
         'arrow_up',
         'arrow_down',
@@ -363,53 +363,56 @@ $(document).ready(function () {
         'icon_clipboard',
         'icon-tiktok',
         'icon-discord',
-    ];
+    ]
 
-    let initIconsField = function () {
-        $('.icon-select').each(function (index, el) {
-            let value = $(el).children('option:selected').val();
+    let initIconsField = function() {
+        $('.icon-select').each(function(index, el) {
+            let value = $(el).children('option:selected').val()
 
-            let options = '';
+            let options = ''
 
-            if (!value) {
-                options = '<option value="">&nbsp;</option>';
+            const $this = $(el)
+            if ($this.data('empty-value')) {
+                options = '<option value="">' + $this.data('empty-value') + '</option>'
+            } else if (!value) {
+                options = '<option value="">&nbsp;</option>'
             }
 
-            icons.forEach(function (value) {
-                options += '<option value="' + value + '">' + value + '</option>';
-            });
+            icons.forEach(function(value) {
+                options += '<option value="' + value + '">' + value + '</option>'
+            })
 
-            $(el).html(options);
-            $(el).val(value);
+            $(el).html(options)
+            $(el).val(value)
 
             let select2Options = {
-                templateResult: function (state) {
+                templateResult: function(state) {
                     if (!state.id) {
-                        return state.text;
+                        return state.text
                     }
-                    return $('<span><i class="elegant-icon ' + state.id + '"></i></span>&nbsp; ' + state.text + '</span>');
+                    return $('<span><i class="elegant-icon ' + state.id + '"></i></span>&nbsp; ' + state.text + '</span>')
                 },
                 width: '100%',
-                templateSelection: function (state) {
+                templateSelection: function(state) {
                     if (!state.id) {
-                        return state.text;
+                        return state.text
                     }
-                    return $('<span><i class="elegant-icon ' + state.id + '"></i></span>&nbsp; ' + state.text + '</span>');
+                    return $('<span><i class="elegant-icon ' + state.id + '"></i></span>&nbsp; ' + state.text + '</span>')
                 },
-            };
-
-            let parent = $(el).closest('.modal');
-            if (parent.length) {
-                select2Options.dropdownParent = parent;
             }
 
-            $(el).select2(select2Options);
-        });
+            let parent = $(el).closest('.modal')
+            if (parent.length) {
+                select2Options.dropdownParent = parent
+            }
+
+            $(el).select2(select2Options)
+        })
     }
 
-    initIconsField();
+    initIconsField()
 
     document.addEventListener('core-init-resources', function(e) {
-        initIconsField();
-    });
-});
+        initIconsField()
+    })
+})

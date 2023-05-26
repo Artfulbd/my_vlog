@@ -7,6 +7,7 @@ use Botble\AuditLog\Models\AuditHistory;
 use Botble\AuditLog\Repositories\Caches\AuditLogCacheDecorator;
 use Botble\AuditLog\Repositories\Eloquent\AuditLogRepository;
 use Botble\AuditLog\Repositories\Interfaces\AuditLogInterface;
+use Botble\Base\Facades\DashboardMenu;
 use Botble\Base\Traits\LoadAndPublishDataTrait;
 use Illuminate\Console\Scheduling\Schedule;
 use Illuminate\Foundation\AliasLoader;
@@ -44,16 +45,15 @@ class AuditLogServiceProvider extends ServiceProvider
             ->publishAssets();
 
         $this->app['events']->listen(RouteMatched::class, function () {
-            dashboard_menu()
-                ->registerItem([
-                    'id' => 'cms-plugin-audit-log',
-                    'priority' => 8,
-                    'parent_id' => 'cms-core-platform-administration',
-                    'name' => 'plugins/audit-log::history.name',
-                    'icon' => null,
-                    'url' => route('audit-log.index'),
-                    'permissions' => ['audit-log.index'],
-                ]);
+            DashboardMenu::registerItem([
+                'id' => 'cms-plugin-audit-log',
+                'priority' => 8,
+                'parent_id' => 'cms-core-platform-administration',
+                'name' => 'plugins/audit-log::history.name',
+                'icon' => null,
+                'url' => route('audit-log.index'),
+                'permissions' => ['audit-log.index'],
+            ]);
         });
 
         $this->app->booted(function () {

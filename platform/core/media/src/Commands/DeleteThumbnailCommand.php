@@ -18,7 +18,7 @@ class DeleteThumbnailCommand extends Command
 
         $errors = [];
 
-        $description = 'Processing ' . $files->count() . ' ' . Str::plural('file', $files->count()) . '...';
+        $description = sprintf('Processing %d %s...', $files->count(), Str::plural('file', $files->count()));
 
         $this->newLine();
         $this->components->task($description, function () use ($files, &$errors) {
@@ -28,7 +28,7 @@ class DeleteThumbnailCommand extends Command
                     continue;
                 }
 
-                $this->components->info('Processing ' . $file->url);
+                $this->components->info(sprintf('Processing %s', $file->url));
 
                 try {
                     RvMedia::deleteThumbnails($file);

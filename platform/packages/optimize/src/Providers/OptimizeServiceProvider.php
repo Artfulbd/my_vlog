@@ -27,7 +27,9 @@ class OptimizeServiceProvider extends ServiceProvider
             ->loadAndPublishTranslations()
             ->loadAndPublishViews();
 
-        AliasLoader::getInstance()->alias('OptimizerHelper', OptimizerHelper::class);
+        if (! class_exists('OptimizerHelper')) {
+            AliasLoader::getInstance()->alias('OptimizerHelper', OptimizerHelper::class);
+        }
 
         $this->app['events']->listen(RouteMatched::class, function () {
             if (OptimizerHelper::isEnabled()) {

@@ -10,14 +10,15 @@ use Botble\Blog\Models\Tag;
 use Botble\Blog\Repositories\Interfaces\CategoryInterface;
 use Botble\Blog\Repositories\Interfaces\PostInterface;
 use Botble\Blog\Repositories\Interfaces\TagInterface;
+use Botble\Media\Facades\RvMedia;
+use Botble\SeoHelper\Facades\SeoHelper;
 use Botble\SeoHelper\SeoOpenGraph;
 use Botble\Slug\Models\Slug;
+use Botble\Theme\Facades\AdminBar;
+use Botble\Theme\Facades\Theme;
 use Illuminate\Database\Query\Builder;
 use Illuminate\Support\Arr;
 use Illuminate\Support\Facades\Auth;
-use Botble\Media\Facades\RvMedia;
-use Botble\SeoHelper\Facades\SeoHelper;
-use Botble\Theme\Facades\Theme;
 
 class BlogService
 {
@@ -68,7 +69,7 @@ class BlogService
                 SeoHelper::meta()->setUrl($post->url);
 
                 if (function_exists('admin_bar')) {
-                    admin_bar()->registerLink(
+                    AdminBar::registerLink(
                         trans('plugins/blog::posts.edit_this_post'),
                         route('posts.edit', $post->id),
                         null,
@@ -128,7 +129,7 @@ class BlogService
                 SeoHelper::meta()->setUrl($category->url);
 
                 if (function_exists('admin_bar')) {
-                    admin_bar()->registerLink(
+                    AdminBar::registerLink(
                         trans('plugins/blog::categories.edit_this_category'),
                         route('categories.edit', $category->id),
                         null,
@@ -181,7 +182,12 @@ class BlogService
                 SeoHelper::meta()->setUrl($tag->url);
 
                 if (function_exists('admin_bar')) {
-                    admin_bar()->registerLink(trans('plugins/blog::tags.edit_this_tag'), route('tags.edit', $tag->id), null, 'tags.edit');
+                    AdminBar::registerLink(
+                        trans('plugins/blog::tags.edit_this_tag'),
+                        route('tags.edit', $tag->id),
+                        null,
+                        'tags.edit'
+                    );
                 }
 
                 $posts = get_posts_by_tag($tag->id, (int)theme_option('number_of_posts_in_a_tag', 12));

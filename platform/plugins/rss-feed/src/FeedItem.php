@@ -10,7 +10,7 @@ class FeedItem
 {
     public ?Feed $feed = null;
 
-    protected ?string $id = null;
+    protected string|null $id = null;
 
     protected string $title;
 

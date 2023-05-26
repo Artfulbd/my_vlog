@@ -34,7 +34,7 @@ class SlugCompiler
         return apply_filters(CMS_SLUG_VARIABLES, $this->variables);
     }
 
-    public function compile(?string $prefix, BaseModel|string|null $model = null): string
+    public function compile(string|null $prefix, BaseModel|string|null $model = null): string
     {
         if (! $prefix) {
             return '';

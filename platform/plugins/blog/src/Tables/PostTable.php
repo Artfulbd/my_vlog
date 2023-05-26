@@ -198,7 +198,7 @@ class PostTable extends TableAbstract
         return $this->categoryRepository->pluck('name', 'id');
     }
 
-    public function applyFilterCondition(EloquentBuilder|QueryBuilder|EloquentRelation $query, string $key, string $operator, ?string $value): EloquentRelation|EloquentBuilder|QueryBuilder
+    public function applyFilterCondition(EloquentBuilder|QueryBuilder|EloquentRelation $query, string $key, string $operator, string|null $value): EloquentRelation|EloquentBuilder|QueryBuilder
     {
         if ($key === 'category' && $value && ! BaseHelper::isJoined($query, 'post_categories')) {
             $query = $query
@@ -212,7 +212,7 @@ class PostTable extends TableAbstract
         return parent::applyFilterCondition($query, $key, $operator, $value);
     }
 
-    public function saveBulkChangeItem(Model|Post $item, string $inputKey, ?string $inputValue): Model|bool
+    public function saveBulkChangeItem(Model|Post $item, string $inputKey, string|null $inputValue): Model|bool
     {
         if ($inputKey === 'category') {
             /**

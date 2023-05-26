@@ -19,6 +19,10 @@ class AnalyticsServiceProvider extends ServiceProvider
 
     public function register(): void
     {
+        if (! class_exists('Google\Service\Analytics\GaData')) {
+            return;
+        }
+
         $this->app->bind(AnalyticsClient::class, function () {
             return AnalyticsClientFactory::createForConfig(config('plugins.analytics.general'));
         });

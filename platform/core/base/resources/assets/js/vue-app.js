@@ -1,7 +1,7 @@
 import Vue from 'vue'
+import emitter from 'tiny-emitter/instance'
 import sanitizeHTML from 'sanitize-html'
 import _ from 'lodash'
-import emitter from 'tiny-emitter/instance'
 import { BootstrapVue } from 'bootstrap-vue'
 
 class VueApp {
@@ -22,12 +22,6 @@ class VueApp {
         this.bootingCallbacks = []
         this.bootedCallbacks = []
         this.vueInstance = null
-        this.eventBus = {
-            $on: (...args) => emitter.on(...args),
-            $once: (...args) => emitter.once(...args),
-            $off: (...args) => emitter.off(...args),
-            $emit: (...args) => emitter.emit(...args),
-        }
         this.hasBooted = false
     }
 
@@ -57,9 +51,10 @@ class VueApp {
 }
 
 window.vueApp = new VueApp()
+window.$event = emitter
 
 document.addEventListener('DOMContentLoaded', () => {
-    if (!window.vueApp.hasBooted) {
+    if (! window.vueApp.hasBooted) {
         window.vueApp.boot()
     }
 })

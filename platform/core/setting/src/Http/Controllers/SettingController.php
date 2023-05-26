@@ -13,6 +13,7 @@ use Botble\Base\Supports\Language;
 use Botble\JsValidation\Facades\JsValidator;
 use Botble\Media\Repositories\Interfaces\MediaFileInterface;
 use Botble\Media\Repositories\Interfaces\MediaFolderInterface;
+use Botble\Setting\Http\Requests\EmailSettingRequest;
 use Botble\Setting\Http\Requests\EmailTemplateRequest;
 use Botble\Setting\Http\Requests\LicenseSettingRequest;
 use Botble\Setting\Http\Requests\MediaSettingRequest;
@@ -66,10 +67,10 @@ class SettingController extends BaseController
             session()->put('site-locale', $locale);
         }
 
-        $isDemoModeEnabled = app()->environment('demo');
+        $isDemoModeEnabled = BaseHelper::hasDemoModeEnabled();
 
         if (! $isDemoModeEnabled) {
-            setting()->set('locale', $locale)->save();
+            setting()->set('locale', $locale);
         }
 
         $adminTheme = $request->input('default_admin_theme');
@@ -78,7 +79,7 @@ class SettingController extends BaseController
         }
 
         if (! $isDemoModeEnabled) {
-            setting()->set('default_admin_theme', $adminTheme)->save();
+            setting()->set('default_admin_theme', $adminTheme);
         }
 
         $adminLocalDirection = $request->input('admin_locale_direction');
@@ -87,7 +88,8 @@ class SettingController extends BaseController
         }
 
         if (! $isDemoModeEnabled) {
-            setting()->set('admin_locale_direction', $adminLocalDirection)->save();
+            setting()->set('admin_locale_direction', $adminLocalDirection);
+            setting()->save();
         }
 
         return $response
@@ -113,12 +115,15 @@ class SettingController extends BaseController
         PageTitle::setTitle(trans('core/base::layouts.setting_email'));
 
         Assets::addScriptsDirectly('vendor/core/core/setting/js/setting.js')
-            ->addStylesDirectly('vendor/core/core/setting/css/setting.css');
+            ->addStylesDirectly('vendor/core/core/setting/css/setting.css')
+            ->addScripts(['jquery-validation', 'form-validation']);
 
-        return view('core/setting::email');
+        $jsValidation = JsValidator::formRequest(EmailSettingRequest::class);
+
+        return view('core/setting::email', compact('jsValidation'));
     }
 
-    public function postEditEmailConfig(SettingRequest $request, BaseHttpResponse $response)
+    public function postEditEmailConfig(EmailSettingRequest $request, BaseHttpResponse $response)
     {
         $this->saveSettings($request->except(['_token']));
 
@@ -230,13 +235,16 @@ class SettingController extends BaseController
         PageTitle::setTitle(trans('core/setting::setting.media.title'));
 
         Assets::addScriptsDirectly('vendor/core/core/setting/js/setting.js')
-            ->addStylesDirectly('vendor/core/core/setting/css/setting.css');
+            ->addStylesDirectly('vendor/core/core/setting/css/setting.css')
+            ->addScripts(['jquery-validation', 'form-validation']);
 
         $folderIds = json_decode((string)setting('media_folders_can_add_watermark'), true);
 
         $folders = $mediaFolderRepository->pluck('name', 'id', ['parent_id' => 0]);
 
-        return view('core/setting::media', compact('folders', 'folderIds'));
+        $jsValidation = JsValidator::formRequest(MediaSettingRequest::class);
+
+        return view('core/setting::media', compact('folders', 'folderIds', 'jsValidation'));
     }
 
     public function postEditMediaSetting(MediaSettingRequest $request, BaseHttpResponse $response)
@@ -285,7 +293,7 @@ class SettingController extends BaseController
 
             return $response
                 ->setError()
-                ->setMessage('Envato username must not a URL. Please try with username "' . $username . '"!');
+                ->setMessage(sprintf('Envato username must not a URL. Please try with username "%s"!', $username));
         }
 
         $purchasedCode = $request->input('purchase_code');
@@ -299,16 +307,23 @@ class SettingController extends BaseController
 
             return $response->setMessage('Your license has been activated successfully!')->setData($data);
         } catch (LicenseIsAlreadyActivatedException) {
-            $core->revokeLicense($purchasedCode, $buyer);
-            if (! $core->activateLicense($purchasedCode, $buyer)) {
-                return $response->setError()->setMessage('Your license is invalid.');
+            try {
+                $core->revokeLicense($purchasedCode, $buyer);
+
+                if (! $core->activateLicense($purchasedCode, $buyer)) {
+                    return $response->setError()->setMessage('Your license is invalid.');
+                }
+
+                $data = $this->saveActivatedLicense($core, $buyer);
+
+                return $response
+                    ->setMessage('Your license has been activated successfully and the license on the previous domain has been revoked!')
+                    ->setData($data);
+            } catch (LicenseIsAlreadyActivatedException) {
+                return $response
+                    ->setError()
+                    ->setMessage('Exceeded maximum number of activations, please contact our support to reset your license.');
             }
-
-            $data = $this->saveActivatedLicense($core, $buyer);
-
-            return $response->setMessage(
-                'Your license has been activated successfully and the license on the previous domain has been revoked!'
-            )->setData($data);
         } catch (Throwable $exception) {
             return $response
                 ->setError()

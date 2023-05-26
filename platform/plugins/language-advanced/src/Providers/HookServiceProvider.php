@@ -57,7 +57,7 @@ class HookServiceProvider extends ServiceProvider
         }
     }
 
-    public function languageMetaField(): ?string
+    public function languageMetaField(): string|null
     {
         $languages = Language::getActiveLanguage([
             'lang_code',
@@ -147,7 +147,7 @@ class HookServiceProvider extends ServiceProvider
         }
     }
 
-    public function getCurrentAdminLanguage(Request $request, Model|string|null $data = null): ?string
+    public function getCurrentAdminLanguage(Request $request, Model|string|null $data = null): string|null
     {
         $code = null;
         if ($request->has('ref_lang')) {
@@ -335,7 +335,7 @@ class HookServiceProvider extends ServiceProvider
         }
     }
 
-    public function changeSlugField(?string $html = null, Model|string|null $object = null): ?string
+    public function changeSlugField(string|null $html = null, Model|string|null $object = null): string|null
     {
         if (is_in_admin() && request()->input('ref_lang') && Language::getCurrentAdminLocaleCode() != Language::getDefaultLocaleCode() && LanguageAdvancedManager::isSupported($object) && SlugHelper::isSupportedModel(get_class($object))) {
             Assets::addStylesDirectly('vendor/core/packages/slug/css/slug.css');

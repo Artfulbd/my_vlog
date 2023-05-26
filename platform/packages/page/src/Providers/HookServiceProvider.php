@@ -33,7 +33,7 @@ class HookServiceProvider extends ServiceProvider
 
         if (defined('THEME_FRONT_HEADER')) {
             add_action(BASE_ACTION_PUBLIC_RENDER_SINGLE, function ($screen, $page): void {
-                add_filter(THEME_FRONT_HEADER, function (?string $html) use ($page): ?string {
+                add_filter(THEME_FRONT_HEADER, function (string|null $html) use ($page): string|null {
                     if (get_class($page) != Page::class) {
                         return $html;
                     }

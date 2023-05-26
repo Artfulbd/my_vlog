@@ -6,12 +6,13 @@ use Carbon\Carbon;
 use Exception;
 use Botble\Base\Facades\Html;
 use Illuminate\Support\Collection;
+use Illuminate\Support\Facades\App;
 use Illuminate\Support\Facades\File;
 use Illuminate\Support\HtmlString;
 
 class BaseHelper
 {
-    public function formatTime(Carbon $timestamp, ?string $format = 'j M Y H:i'): string
+    public function formatTime(Carbon $timestamp, string|null $format = 'j M Y H:i'): string
     {
         $first = Carbon::create(0000, 0, 0, 00, 00, 00);
 
@@ -22,7 +23,7 @@ class BaseHelper
         return $timestamp->format($format);
     }
 
-    public function formatDate(?string $date, ?string $format = null): ?string
+    public function formatDate(string|null $date, string|null $format = null): string|null
     {
         if (empty($format)) {
             $format = config('core.base.general.date_format.date');
@@ -35,7 +36,7 @@ class BaseHelper
         return $this->formatTime(Carbon::parse($date), $format);
     }
 
-    public function formatDateTime(?string $date, string $format = null): ?string
+    public function formatDateTime(string|null $date, string $format = null): string|null
     {
         if (empty($format)) {
             $format = config('core.base.general.date_format.date_time');
@@ -132,6 +133,11 @@ class BaseHelper
         return apply_filters(BASE_FILTER_SITE_LANGUAGE_DIRECTION, setting('locale_direction', 'ltr'));
     }
 
+    public function isRtlEnabled(): bool
+    {
+        return $this->siteLanguageDirection() == 'rtl';
+    }
+
     public function adminLanguageDirection(): string
     {
         $direction = session('admin_locale_direction', setting('admin_locale_direction', 'ltr'));
@@ -146,7 +152,7 @@ class BaseHelper
         return $pageId && $homepageId && $pageId == $homepageId;
     }
 
-    public function getHomepageId(): ?string
+    public function getHomepageId(): string|null
     {
         return theme_option('homepage_id', setting('show_on_front'));
     }
@@ -192,7 +198,7 @@ class BaseHelper
         return 'ckeditor';
     }
 
-    public function removeQueryStringVars(?string $url, array|string $key): ?string
+    public function removeQueryStringVars(string|null $url, array|string $key): string|null
     {
         if (! is_array($key)) {
             $key = [$key];
@@ -206,7 +212,7 @@ class BaseHelper
         return $url;
     }
 
-    public function cleanEditorContent(?string $value): string
+    public function cleanEditorContent(string|null $value): string
     {
         $value = str_replace('<span class="style-scope yt-formatted-string" dir="auto">', '', $value);
 
@@ -312,7 +318,7 @@ class BaseHelper
         return $this;
     }
 
-    public function removeSpecialCharacters(?string $string): array|string|null
+    public function removeSpecialCharacters(string|null $string): array|string|null
     {
         $string = str_replace(' ', '-', $string); // Replaces all spaces with hyphens.
         $string = preg_replace('/[^A-Za-z0-9\-]/', '', $string); // Removes special chars.
@@ -331,7 +337,7 @@ class BaseHelper
         return $value;
     }
 
-    public function cleanShortcodes(?string $content): ?string
+    public function cleanShortcodes(string|null $content): string|null
     {
         if (! $content) {
             return $content;
@@ -344,7 +350,7 @@ class BaseHelper
         return $shortcodeCompiler->strip($content);
     }
 
-    public function stringify($content): ?string
+    public function stringify($content): string|null
     {
         if (empty($content)) {
             return null;
@@ -368,7 +374,11 @@ class BaseHelper
 
     public function googleFonts(string $font, bool $inline = true)
     {
-        if (! config('core.base.general.google_fonts_enabled_cache')) {
+        if (! config('core.base.general.google_fonts_enabled', true)) {
+            return '';
+        }
+
+        if (! config('core.base.general.google_fonts_enabled_cache', true)) {
             return Html::style(str_replace('https://fonts.googleapis.com', $this->getGoogleFontsURL(), $font));
         }
 
@@ -390,8 +400,13 @@ class BaseHelper
     /**
      * @deprecated
      */
-    public function routeIdRegex(): ?string
+    public function routeIdRegex(): string|null
     {
         return '[0-9]+';
+    }
+
+    public function hasDemoModeEnabled(): bool
+    {
+        return App::environment('demo');
     }
 }

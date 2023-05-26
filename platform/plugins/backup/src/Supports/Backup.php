@@ -14,13 +14,13 @@ use Symfony\Component\Process\Process;
 
 class Backup
 {
-    protected ?string $folder = null;
+    protected string|null $folder = null;
 
     public function __construct(protected Filesystem $files, protected Zipper $zipper)
     {
     }
 
-    public function createBackupFolder(string $name, ?string $description = null): array
+    public function createBackupFolder(string $name, string|null $description = null): array
     {
         $backupFolder = $this->createFolder($this->getBackupPath());
         $now = Carbon::now()->format('Y-m-d-H-i-s');
@@ -54,7 +54,7 @@ class Backup
         return $folder;
     }
 
-    public function getBackupPath(?string $path = null): string
+    public function getBackupPath(string|null $path = null): string
     {
         return storage_path('app/backup') . ($path ? '/' . $path : null);
     }

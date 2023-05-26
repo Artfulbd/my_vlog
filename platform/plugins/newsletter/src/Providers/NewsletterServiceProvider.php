@@ -2,6 +2,8 @@
 
 namespace Botble\Newsletter\Providers;
 
+use Botble\Base\Facades\DashboardMenu;
+use Botble\Base\Facades\EmailHandler;
 use Botble\Base\Traits\LoadAndPublishDataTrait;
 use Botble\Newsletter\Contracts\Factory;
 use Botble\Newsletter\Facades\Newsletter as NewsletterFacade;
@@ -10,11 +12,10 @@ use Botble\Newsletter\NewsletterManager;
 use Botble\Newsletter\Repositories\Caches\NewsletterCacheDecorator;
 use Botble\Newsletter\Repositories\Eloquent\NewsletterRepository;
 use Botble\Newsletter\Repositories\Interfaces\NewsletterInterface;
-use Botble\Base\Facades\EmailHandler;
 use Exception;
 use Illuminate\Contracts\Support\DeferrableProvider;
-use Illuminate\Support\Arr;
 use Illuminate\Routing\Events\RouteMatched;
+use Illuminate\Support\Arr;
 use Illuminate\Support\ServiceProvider;
 
 class NewsletterServiceProvider extends ServiceProvider implements DeferrableProvider
@@ -48,7 +49,7 @@ class NewsletterServiceProvider extends ServiceProvider implements DeferrablePro
         $this->app->register(EventServiceProvider::class);
 
         $this->app['events']->listen(RouteMatched::class, function () {
-            dashboard_menu()->registerItem([
+            DashboardMenu::registerItem([
                 'id' => 'cms-plugins-newsletter',
                 'priority' => 6,
                 'parent_id' => null,
@@ -61,7 +62,7 @@ class NewsletterServiceProvider extends ServiceProvider implements DeferrablePro
             EmailHandler::addTemplateSettings(NEWSLETTER_MODULE_SCREEN_NAME, config('plugins.newsletter.email', []));
         });
 
-        add_filter(BASE_FILTER_AFTER_SETTING_CONTENT, function (?string $data) {
+        add_filter(BASE_FILTER_AFTER_SETTING_CONTENT, function (string|null $data) {
             $mailchimpContactList = [];
 
             if (setting('newsletter_mailchimp_api_key')) {
@@ -94,8 +95,24 @@ class NewsletterServiceProvider extends ServiceProvider implements DeferrablePro
                 }
             }
 
-            return $data . view('plugins/newsletter::setting', compact('mailchimpContactList', 'sendGridContactList'))->render();
+            return $data . view(
+                'plugins/newsletter::setting',
+                compact('mailchimpContactList', 'sendGridContactList')
+            )->render();
         }, 249);
+
+        add_filter('cms_settings_validation_rules', [$this, 'addSettingRules'], 249);
+    }
+
+    public function addSettingRules(array $rules): array
+    {
+        return array_merge($rules, [
+            'enable_newsletter_contacts_list_api' => 'nullable|in:0,1',
+            'newsletter_mailchimp_api_key' => 'nullable|string',
+            'newsletter_mailchimp_list_id' => 'nullable|string',
+            'newsletter_sendgrid_api_key' => 'nullable|string',
+            'newsletter_sendgrid_list_id' => 'nullable|string',
+        ]);
     }
 
     public function provides(): array

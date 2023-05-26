@@ -26,7 +26,7 @@ class Blueprint extends IlluminateBlueprint
         return parent::foreignId($column);
     }
 
-    public function morphs($name, $indexName = null)
+    public function morphs($name, $indexName = null): void
     {
         if (Model::determineIfUsingUuidsForId()) {
             $this->uuidMorphs($name, $indexName);
@@ -37,7 +37,7 @@ class Blueprint extends IlluminateBlueprint
         parent::morphs($name, $indexName);
     }
 
-    public function nullableMorphs($name, $indexName = null)
+    public function nullableMorphs($name, $indexName = null): void
     {
         if (Model::determineIfUsingUuidsForId()) {
             $this->nullableUuidMorphs($name, $indexName);

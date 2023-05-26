@@ -45,7 +45,7 @@ class InfoTable extends TableAbstract
         ];
     }
 
-    protected function getDom(): ?string
+    protected function getDom(): string|null
     {
         return $this->simpleDom();
     }

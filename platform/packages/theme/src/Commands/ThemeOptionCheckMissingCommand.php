@@ -2,14 +2,13 @@
 
 namespace Botble\Theme\Commands;
 
-use Botble\Setting\Models\Setting;
+use Botble\Setting\Facades\Setting;
 use Illuminate\Console\Command;
 use Illuminate\Support\Arr;
 use Illuminate\Support\Collection;
 use Illuminate\Support\Str;
 use Botble\Language\Facades\Language;
 use Symfony\Component\Console\Attribute\AsCommand;
-use Botble\Theme\Facades\Theme;
 use Botble\Theme\Facades\ThemeOption;
 
 #[AsCommand('cms:theme:options:check', 'Check difference theme options between database and option definitions')]
@@ -19,17 +18,16 @@ class ThemeOptionCheckMissingCommand extends Command
     {
         $isReverse = $this->option('reverse');
 
-        $theme = Theme::getThemeName();
-        $fields = array_map(function ($name) use ($theme) {
-            return 'theme-' . $theme . '-' . $name;
+        $fields = array_map(function ($name) {
+            return ThemeOption::getOptionKey($name);
         }, array_keys(Arr::get(ThemeOption::getFields(), 'theme')));
 
-        $existsOptionsQuery = Setting::query();
-        $existsOptionsQuery->where('key', 'LIKE', 'theme-' . $theme . '-%');
+        $existsOptionsQuery = Setting::newQuery();
+        $existsOptionsQuery->where('key', 'LIKE', ThemeOption::getOptionKey('%'));
 
         if (is_plugin_active('language')) {
             foreach (Language::getSupportedLanguagesKeys() as $language) {
-                $existsOptionsQuery->where('key', 'NOT LIKE', 'theme-' . $theme . '-' . $language . '-%');
+                $existsOptionsQuery->where('key', 'NOT LIKE', ThemeOption::getOptionKey('%', $language));
             }
         }
 

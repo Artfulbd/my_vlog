@@ -162,7 +162,7 @@ class UserTable extends TableAbstract
         return $this->addCreateButton(route('users.create'), 'users.create');
     }
 
-    public function htmlDrawCallbackFunction(): ?string
+    public function htmlDrawCallbackFunction(): string|null
     {
         return parent::htmlDrawCallbackFunction() . '$(".editable").editable({mode: "inline"});';
     }
@@ -221,9 +221,9 @@ class UserTable extends TableAbstract
         ];
     }
 
-    public function saveBulkChanges(array $ids, string $inputKey, ?string $inputValue): bool
+    public function saveBulkChanges(array $ids, string $inputKey, string|null $inputValue): bool
     {
-        if (app()->environment('demo')) {
+        if (BaseHelper::hasDemoModeEnabled()) {
             throw new DisabledInDemoModeException();
         }
 

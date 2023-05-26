@@ -5,8 +5,12 @@ use Botble\Base\Facades\Action;
 use Botble\Base\Facades\Filter;
 
 if (! function_exists('add_filter')) {
-    function add_filter(string|array|null $hook, string|array|Closure $callback, int $priority = 20, int $arguments = 1): void
-    {
+    function add_filter(
+        string|array|null $hook,
+        string|array|Closure $callback,
+        int $priority = 20,
+        int $arguments = 1
+    ): void {
         Filter::addListener($hook, $callback, $priority, $arguments);
     }
 }
@@ -19,8 +23,12 @@ if (! function_exists('remove_filter')) {
 }
 
 if (! function_exists('add_action')) {
-    function add_action(string|array|null $hook, string|array|Closure $callback, int $priority = 20, int $arguments = 1): void
-    {
+    function add_action(
+        string|array|null $hook,
+        string|array|Closure $callback,
+        int $priority = 20,
+        int $arguments = 1
+    ): void {
         Action::addListener($hook, $callback, $priority, $arguments);
     }
 }
@@ -40,7 +48,7 @@ if (! function_exists('do_action')) {
 }
 
 if (! function_exists('get_hooks')) {
-    function get_hooks(?string $name = null, bool $isFilter = true): array
+    function get_hooks(string|null $name = null, bool $isFilter = true): array
     {
         if ($isFilter) {
             $listeners = Filter::getListeners();

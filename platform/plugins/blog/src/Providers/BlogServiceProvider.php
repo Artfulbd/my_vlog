@@ -3,27 +3,28 @@
 namespace Botble\Blog\Providers;
 
 use Botble\Api\Facades\ApiHelper;
-use Botble\LanguageAdvanced\Supports\LanguageAdvancedManager;
-use Botble\Shortcode\View\View;
-use Illuminate\Routing\Events\RouteMatched;
+use Botble\Base\Facades\DashboardMenu;
 use Botble\Base\Traits\LoadAndPublishDataTrait;
-use Botble\Blog\Models\Post;
-use Botble\Blog\Repositories\Caches\PostCacheDecorator;
-use Botble\Blog\Repositories\Eloquent\PostRepository;
-use Botble\Blog\Repositories\Interfaces\PostInterface;
-use Illuminate\Support\ServiceProvider;
 use Botble\Blog\Models\Category;
-use Botble\Blog\Repositories\Caches\CategoryCacheDecorator;
-use Botble\Blog\Repositories\Eloquent\CategoryRepository;
-use Botble\Blog\Repositories\Interfaces\CategoryInterface;
+use Botble\Blog\Models\Post;
 use Botble\Blog\Models\Tag;
+use Botble\Blog\Repositories\Caches\CategoryCacheDecorator;
+use Botble\Blog\Repositories\Caches\PostCacheDecorator;
 use Botble\Blog\Repositories\Caches\TagCacheDecorator;
+use Botble\Blog\Repositories\Eloquent\CategoryRepository;
+use Botble\Blog\Repositories\Eloquent\PostRepository;
 use Botble\Blog\Repositories\Eloquent\TagRepository;
+use Botble\Blog\Repositories\Interfaces\CategoryInterface;
+use Botble\Blog\Repositories\Interfaces\PostInterface;
 use Botble\Blog\Repositories\Interfaces\TagInterface;
 use Botble\Language\Facades\Language;
+use Botble\LanguageAdvanced\Supports\LanguageAdvancedManager;
 use Botble\SeoHelper\Facades\SeoHelper;
-use Botble\Theme\Facades\SiteMapManager;
+use Botble\Shortcode\View\View;
 use Botble\Slug\Facades\SlugHelper;
+use Botble\Theme\Facades\SiteMapManager;
+use Illuminate\Routing\Events\RouteMatched;
+use Illuminate\Support\ServiceProvider;
 
 /**
  * @since 02/07/2016 09:50 AM
@@ -74,16 +75,15 @@ class BlogServiceProvider extends ServiceProvider
         SiteMapManager::registerKey(['blog-posts', 'blog-categories', 'blog-tags']);
 
         $this->app['events']->listen(RouteMatched::class, function () {
-            dashboard_menu()
-                ->registerItem([
-                    'id' => 'cms-plugins-blog',
-                    'priority' => 3,
-                    'parent_id' => null,
-                    'name' => 'plugins/blog::base.menu_name',
-                    'icon' => 'fa fa-edit',
-                    'url' => route('posts.index'),
-                    'permissions' => ['posts.index'],
-                ])
+            DashboardMenu::registerItem([
+                'id' => 'cms-plugins-blog',
+                'priority' => 3,
+                'parent_id' => null,
+                'name' => 'plugins/blog::base.menu_name',
+                'icon' => 'fa fa-edit',
+                'url' => route('posts.index'),
+                'permissions' => ['posts.index'],
+            ])
                 ->registerItem([
                     'id' => 'cms-plugins-blog-post',
                     'priority' => 1,

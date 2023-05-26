@@ -73,14 +73,21 @@
                 "Botble\\Chart\\Providers\\ChartServiceProvider"
             ],
             "aliases": {
-                "Assets": "Botble\\Base\\Facades\\Assets",
-                "MetaBox": "Botble\\Base\\Facades\\MetaBox",
                 "Action": "Botble\\Base\\Facades\\Action",
-                "Filter": "Botble\\Base\\Facades\\Filter",
-                "EmailHandler": "Botble\\Base\\Facades\\EmailHandler",
+                "Assets": "Botble\\Base\\Facades\\Assets",
+                "BaseHelper": "Botble\\Base\\Facades\\BaseHelper",
                 "Breadcrumbs": "Botble\\Base\\Facades\\Breadcrumbs",
+                "DashboardMenu": "Botble\\Base\\Facades\\DashboardMenu",
+                "EmailHandler": "Botble\\Base\\Facades\\EmailHandler",
+                "Filter": "Botble\\Base\\Facades\\Filter",
+                "Form": "Botble\\Base\\Facades\\Form",
+                "Html": "Botble\\Base\\Facades\\Html",
                 "MacroableModels": "Botble\\Base\\Facades\\MacroableModels",
-                "JsValidator": "Botble\\JsValidation\\Facades\\JsValidator"
+                "MetaBox": "Botble\\Base\\Facades\\MetaBox",
+                "PageTitle": "Botble\\Base\\Facades\\PageTitle",
+                "JsValidator": "Botble\\JsValidation\\Facades\\JsValidator",
+                "Setting": "Botble\\Setting\\Facades\\Setting",
+                "RvMedia": "Botble\\Media\\Facades\\RvMedia"
             }
         }
     },

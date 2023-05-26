@@ -26,6 +26,7 @@ class WidgetGroupCollection
         if (isset($this->groups[$sidebarId])) {
             return $this->groups[$sidebarId];
         }
+
         $this->groups[$sidebarId] = new WidgetGroup(['id' => $sidebarId, 'name' => $sidebarId], $this->app);
 
         return $this->groups[$sidebarId];

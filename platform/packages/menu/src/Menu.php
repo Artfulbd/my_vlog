@@ -208,7 +208,7 @@ class Menu
         return $this->menuRepository->allBy(['status' => BaseStatusEnum::PUBLISHED], $with);
     }
 
-    public function generateMenu(array $args = []): ?string
+    public function generateMenu(array $args = []): string|null
     {
         $this->load();
 
@@ -274,7 +274,7 @@ class Menu
         echo view('packages/menu::menu-options', compact('options', 'name'));
     }
 
-    public function generateSelect(array $args = []): ?string
+    public function generateSelect(array $args = []): string|null
     {
         /**
          * @var BaseModel $model

@@ -11,17 +11,11 @@ use Illuminate\Support\Facades\Session;
 
 abstract class AbstractHandler
 {
-    protected Request $request;
+    protected array $config;
 
-    protected UploadedFile $file;
-
-    protected mixed $config;
-
-    public function __construct(Request $request, UploadedFile $file)
+    public function __construct(protected Request $request, protected UploadedFile $file)
     {
-        $this->request = $request;
-        $this->file = $file;
-        $this->config = RvMedia::getConfig('chunk');
+        $this->config = RvMedia::getConfig('chunk', []);
     }
 
     /**

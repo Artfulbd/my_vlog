@@ -6,7 +6,7 @@ use Botble\Base\Supports\Assets as BaseAssets;
 use Illuminate\Support\Facades\Facade;
 
 /**
- * @method static mixed setConfig(array $config)
+ * @method static void setConfig(array $config)
  * @method static array getThemes()
  * @method static string renderHeader($lastStyles = [])
  * @method static string renderFooter()

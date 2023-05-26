@@ -3,7 +3,6 @@
 namespace Botble\Language;
 
 use Botble\PluginManagement\Abstracts\PluginOperationAbstract;
-use Botble\Setting\Models\Setting as SettingModel;
 use Illuminate\Support\Facades\Schema;
 use Botble\Setting\Facades\Setting;
 
@@ -27,13 +26,11 @@ class Plugin extends PluginOperationAbstract
         Schema::dropIfExists('languages');
         Schema::dropIfExists('language_meta');
 
-        SettingModel::query()
-            ->whereIn('key', [
-                'language_hide_default',
-                'language_switcher_display',
-                'language_display',
-                'language_hide_languages',
-            ])
-            ->delete();
+        Setting::delete([
+            'language_hide_default',
+            'language_switcher_display',
+            'language_display',
+            'language_hide_languages',
+        ]);
     }
 }

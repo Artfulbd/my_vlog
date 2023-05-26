@@ -26,10 +26,12 @@
 
             <div class="page-content-wrapper">
                 <div class="page-content @if (Route::currentRouteName() == 'media.index') rv-media-integrate-wrapper @endif" style="min-height: 100vh">
-                    {!! Breadcrumbs::render('main', page_title()->getTitle(false)) !!}
+                    {!! Breadcrumbs::render('main', PageTitle::getTitle(false)) !!}
                     <div class="clearfix"></div>
                     <div id="main">
+                        {!! apply_filters('core_layout_before_content', null) !!}
                         @yield('content')
+                        {!! apply_filters('core_layout_after_content', null) !!}
                     </div>
                 </div>
             </div>

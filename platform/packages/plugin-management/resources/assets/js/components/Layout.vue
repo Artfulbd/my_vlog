@@ -201,9 +201,9 @@ export default {
         }
     },
     created() {
-        vueApp.eventBus.$on('detail', this.detail)
-        vueApp.eventBus.$on('install', this.install)
-        vueApp.eventBus.$on('changeStatus', this.active)
+        $event.on('detail', this.detail)
+        $event.on('install', this.install)
+        $event.on('changeStatus', this.active)
         this.apiGetList()
     },
     components: {
@@ -295,12 +295,12 @@ export default {
                     this.loading = false
 
                     if (data.error) {
-                        vueApp.eventBus.$emit('onError')
+                        $event.emit('onError')
 
                         return Botble.showError(data.message)
                     }
 
-                    vueApp.eventBus.$emit('assignInstalled', data.data.name)
+                    $event.emit('assignInstalled', data.data.name)
 
                     Botble.showSuccess(data.message)
 
@@ -325,12 +325,12 @@ export default {
                     this.loading = false
 
                     if (data.error) {
-                        vueApp.eventBus.$emit('onError')
+                        $event.emit('onError')
 
                         return Botble.showError(data.message)
                     }
 
-                    vueApp.eventBus.$emit('assignActivated', name)
+                    $event.emit('assignActivated', name)
                     Botble.showSuccess(data.message)
                 })
         },

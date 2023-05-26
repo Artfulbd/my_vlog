@@ -7,14 +7,13 @@ use Botble\Base\Facades\BaseHelper;
 use Botble\Base\Supports\PclZip as Zip;
 use Botble\Translation\Models\Translation;
 use Exception;
-use GuzzleHttp\Client;
-use GuzzleHttp\Exception\GuzzleException;
 use GuzzleHttp\Psr7\Utils;
 use Illuminate\Filesystem\Filesystem;
 use Illuminate\Contracts\Foundation\Application;
 use Illuminate\Support\Arr;
 use Illuminate\Support\Collection;
 use Illuminate\Support\Facades\File;
+use Illuminate\Support\Facades\Http;
 use Illuminate\Support\ServiceProvider;
 use League\Flysystem\Filesystem as Flysystem;
 use League\Flysystem\Local\LocalFilesystemAdapter;
@@ -22,6 +21,7 @@ use League\Flysystem\MountManager;
 use Symfony\Component\VarExporter\VarExporter;
 use Botble\Theme\Facades\Theme;
 use Illuminate\Support\Facades\Lang;
+use Throwable;
 use ZipArchive;
 
 class Manager
@@ -30,8 +30,6 @@ class Manager
 
     public function __construct(protected Application $app, protected Filesystem $files)
     {
-        $this->app = $app;
-        $this->files = $files;
         $this->config = $app['config']['plugins.translation.general'];
     }
 
@@ -105,8 +103,13 @@ class Manager
         }
     }
 
-    public function importTranslation(string $key, string|null|array $value, ?string $locale, ?string $group, bool $replace = false): bool
-    {
+    public function importTranslation(
+        string $key,
+        string|null|array $value,
+        string|null $locale,
+        string|null $group,
+        bool $replace = false
+    ): bool {
         // process only string values
         if (is_array($value)) {
             return false;
@@ -135,7 +138,7 @@ class Manager
         return true;
     }
 
-    public function exportTranslations(?string $group = null): void
+    public function exportTranslations(string|null $group = null): void
     {
         if (! empty($group)) {
             if (! in_array($group, $this->config['exclude_groups'])) {
@@ -145,11 +148,15 @@ class Manager
                     return;
                 }
 
-                $tree = $this->makeTree(Translation::ofTranslatedGroup($group)->orderByGroupKeys(Arr::get(
-                    $this->config,
-                    'sort_keys',
-                    false
-                ))->get());
+                $tree = $this->makeTree(
+                    Translation::ofTranslatedGroup($group)->orderByGroupKeys(
+                        Arr::get(
+                            $this->config,
+                            'sort_keys',
+                            false
+                        )
+                    )->get()
+                );
 
                 foreach ($tree as $locale => $groups) {
                     if (isset($groups[$group])) {
@@ -214,7 +221,7 @@ class Manager
         Translation::truncate();
     }
 
-    public function getConfig(?string $key = null): string|array|null
+    public function getConfig(string|null $key = null): string|array|null
     {
         if ($key == null) {
             return $this->config;
@@ -256,7 +263,10 @@ class Manager
 
                 ksort($translations);
 
-                $this->files->put($file->getRealPath(), json_encode($translations, JSON_UNESCAPED_UNICODE | JSON_PRETTY_PRINT | JSON_UNESCAPED_SLASHES));
+                $this->files->put(
+                    $file->getRealPath(),
+                    json_encode($translations, JSON_UNESCAPED_UNICODE | JSON_PRETTY_PRINT | JSON_UNESCAPED_SLASHES)
+                );
             }
         }
 
@@ -265,17 +275,17 @@ class Manager
 
     public function getRemoteAvailableLocales(): array
     {
-        $client = new Client(['verify' => false]);
-
         try {
-            $info = $client->request('GET', 'https://api.github.com/repos/botble/translations/git/trees/master', [
-                'headers' => [
-                    'Content-Type' => 'application/json',
-                    'Accept' => 'application/json',
-                ],
-            ]);
+            $info = Http::withoutVerifying()
+                ->asJson()
+                ->acceptJson()
+                ->get('https://api.github.com/repos/botble/translations/git/trees/master');
 
-            $info = json_decode($info->getBody()->getContents(), true);
+            if (! $info->ok()) {
+                return ['ar', 'es', 'vi'];
+            }
+
+            $info = $info->json();
 
             $availableLocales = [];
 
@@ -286,7 +296,7 @@ class Manager
 
                 $availableLocales[] = $tree['path'];
             }
-        } catch (Exception|GuzzleException) {
+        } catch (Throwable) {
             $availableLocales = ['ar', 'es', 'vi'];
         }
 
@@ -299,8 +309,6 @@ class Manager
 
         $destination = storage_path('app/translation-files.zip');
 
-        $client = new Client(['verify' => false]);
-
         $availableLocales = $this->getRemoteAvailableLocales();
 
         if (! in_array($locale, $availableLocales)) {
@@ -311,10 +319,17 @@ class Manager
         }
 
         try {
-            $client->request('GET', $repository . '/archive/refs/heads/master.zip', [
-                'sink' => Utils::tryFopen($destination, 'w'),
-            ]);
-        } catch (Exception|GuzzleException $exception) {
+            $response = Http::withoutVerifying()
+                ->sink(Utils::tryFopen($destination, 'w'))
+                ->get($repository . '/archive/refs/heads/master.zip');
+
+            if (! $response->ok()) {
+                return [
+                    'error' => true,
+                    'message' => $response->reason(),
+                ];
+            }
+        } catch (Throwable $exception) {
             return [
                 'error' => true,
                 'message' => $exception->getMessage(),

@@ -32,4 +32,5 @@ return [
     'widget_analytics_browser' => 'Top Browsers',
     'widget_analytics_referrer' => 'Top Referrers',
     'widget_analytics_general' => 'Site Analytics',
+    'missing_library_warning' => 'Analytics plugin error: Missing third-party libraries, please run "composer update" to install them.'
 ];

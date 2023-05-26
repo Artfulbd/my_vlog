@@ -2,6 +2,7 @@
 
 namespace Botble\Gallery\Providers;
 
+use Botble\Base\Facades\DashboardMenu;
 use Botble\Base\Traits\LoadAndPublishDataTrait;
 use Botble\Gallery\Facades\Gallery as GalleryFacade;
 use Botble\Gallery\Models\Gallery;
@@ -12,14 +13,14 @@ use Botble\Gallery\Repositories\Eloquent\GalleryMetaRepository;
 use Botble\Gallery\Repositories\Eloquent\GalleryRepository;
 use Botble\Gallery\Repositories\Interfaces\GalleryInterface;
 use Botble\Gallery\Repositories\Interfaces\GalleryMetaInterface;
+use Botble\Language\Facades\Language;
 use Botble\LanguageAdvanced\Supports\LanguageAdvancedManager;
+use Botble\SeoHelper\Facades\SeoHelper;
+use Botble\Slug\Facades\SlugHelper;
+use Botble\Theme\Facades\SiteMapManager;
 use Illuminate\Foundation\AliasLoader;
 use Illuminate\Routing\Events\RouteMatched;
 use Illuminate\Support\ServiceProvider;
-use Botble\Language\Facades\Language;
-use Botble\SeoHelper\Facades\SeoHelper;
-use Botble\Theme\Facades\SiteMapManager;
-use Botble\Slug\Facades\SlugHelper;
 
 class GalleryServiceProvider extends ServiceProvider
 {
@@ -62,7 +63,7 @@ class GalleryServiceProvider extends ServiceProvider
         SiteMapManager::registerKey(['galleries']);
 
         $this->app['events']->listen(RouteMatched::class, function () {
-            dashboard_menu()->registerItem([
+            DashboardMenu::registerItem([
                 'id' => 'cms-plugins-gallery',
                 'priority' => 5,
                 'parent_id' => null,

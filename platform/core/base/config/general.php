@@ -193,6 +193,7 @@ return [
         'Nobile',
         'Noto Sans',
         'Noto Sans JP',
+        'Noto Sans Bengali',
         'Nova Cut',
         'Nova Flat',
         'Nova Mono',
@@ -294,6 +295,7 @@ return [
     ],
 
     'custom_google_fonts' => env('CMS_CUSTOM_GOOGLE_FONTS', ''),
+    'custom_fonts' => env('CMS_CUSTOM_FONTS', ''),
 
     'countries' => [
         'AF' => 'Afghanistan',
@@ -685,7 +687,6 @@ return [
         ],
     ],
     'enable_system_updater' => env('CMS_ENABLE_SYSTEM_UPDATER', true),
-    'enable_marketplace_feature' => env('CMS_ENABLE_MARKETPLACE_FEATURE', true),
     'phone_validation_rule' => env('CMS_PHONE_VALIDATION_RULE', 'min:8|max:15|regex:/^([0-9\s\-\+\(\)]*)$/'),
     'disable_verify_csrf_token' => env('CMS_DISABLE_VERIFY_CSRF_TOKEN', false),
     'enable_less_secure_web' => env('CMS_ENABLE_LESS_SECURE_WEB', false),
@@ -695,6 +696,7 @@ return [
     'enabled_cleanup_database' => env('CMS_ENABLED_CLEANUP_DATABASE', false),
     'hide_cleanup_system_menu' => env('CMS_HIDE_CLEANUP_SYSTEM_MENU', false),
     'google_fonts_url' => env('CMS_GOOGLE_FONTS_URL', 'https://fonts.bunny.net'),
+    'google_fonts_enabled' => env('CMS_GOOGLE_FONTS_ENABLED', true),
     'google_fonts_enabled_cache' => env('CMS_GOOGLE_FONTS_ENABLED_CACHE', true),
     'using_uuids_for_id' => env('CMS_USING_UUIDS_FOR_ID', false),
     'using_ulids_for_id' => env('CMS_USING_ULIDS_FOR_ID', false),

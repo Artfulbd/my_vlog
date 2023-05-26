@@ -24,7 +24,7 @@ class Assets extends BaseAssets
         $this->styles = $this->config['styles'];
     }
 
-    public function setConfig(array $config)
+    public function setConfig(array $config): void
     {
         $this->config = $config;
     }

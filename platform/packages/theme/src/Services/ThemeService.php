@@ -8,6 +8,7 @@ use Botble\PluginManagement\Services\PluginService;
 use Botble\Setting\Repositories\Interfaces\SettingInterface;
 use Botble\Setting\Supports\SettingStore;
 use Botble\Theme\Events\ThemeRemoveEvent;
+use Botble\Theme\Facades\ThemeOption;
 use Botble\Widget\Repositories\Interfaces\WidgetInterface;
 use Exception;
 use Illuminate\Filesystem\Filesystem;
@@ -102,12 +103,12 @@ class ThemeService
         ];
     }
 
-    protected function getPath(string $theme, ?string $path = null): string
+    protected function getPath(string $theme, string|null $path = null): string
     {
         return rtrim(theme_path(), '/') . '/' . rtrim(ltrim(strtolower($theme), '/'), '/') . '/' . $path;
     }
 
-    public function publishAssets(?string $theme = null): array
+    public function publishAssets(string|null $theme = null): array
     {
         if ($theme) {
             $themes = [$theme];
@@ -167,7 +168,7 @@ class ThemeService
             ->orWhere('theme', 'like', $theme . '-%')
             ->delete();
         $this->settingRepository->getModel()
-            ->where('key', 'like', 'theme-' . $theme . '-%')
+            ->where('key', 'like', ThemeOption::getOptionKey('%', theme: $theme))
             ->delete();
 
         event(new ThemeRemoveEvent($theme));

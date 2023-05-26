@@ -17,6 +17,7 @@ use Illuminate\Support\Facades\Facade;
  * @method static string getAdminPrefix()
  * @method static string getAdminMasterLayoutTemplate()
  * @method static string siteLanguageDirection()
+ * @method static bool isRtlEnabled()
  * @method static string adminLanguageDirection()
  * @method static bool isHomepage(string|int|null $pageId = null)
  * @method static string|null getHomepageId()
@@ -40,6 +41,7 @@ use Illuminate\Support\Facades\Facade;
  * @method static string|null stringify($content)
  * @method static string getGoogleFontsURL()
  * @method static mixed googleFonts(string $font, bool $inline = true)
+ * @method static bool hasDemoModeEnabled()
  *
  * @see \Botble\Base\Helpers\BaseHelper
  */

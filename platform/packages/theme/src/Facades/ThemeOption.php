@@ -26,6 +26,7 @@ use Illuminate\Support\Facades\Facade;
  * @method static \Botble\Theme\ThemeOption setArgs(array $args = [])
  * @method static string|null getArg(string $key = '')
  * @method static \Botble\Theme\ThemeOption setOption(string $key, array|string|null $value = '')
+ * @method static string getOptionKey(string $key, string|null $locale = '', string|null $theme = null)
  * @method static string|null renderField(array $field)
  * @method static bool hasOption(string $key)
  * @method static string|null getOption(string $key = '', array|string|null $default = '')

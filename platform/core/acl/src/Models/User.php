@@ -55,6 +55,7 @@ class User extends BaseModel implements
     ];
 
     protected $casts = [
+        'email_verified_at' => 'datetime',
         'permissions' => 'json',
         'username' => SafeContent::class,
         'first_name' => SafeContent::class,
@@ -98,16 +99,6 @@ class User extends BaseModel implements
                     return RvMedia::getDefaultImage();
                 }
             },
-        );
-    }
-
-    protected function permissions(): Attribute
-    {
-        return Attribute::make(
-            get: function ($value) {
-                return json_decode($value ?: '', true) ?: [];
-            },
-            set: fn ($value) => $value ? json_encode($value) : ''
         );
     }
 
@@ -176,7 +167,7 @@ class User extends BaseModel implements
         return false;
     }
 
-    public function delete(): ?bool
+    public function delete(): bool|null
     {
         if ($this->exists) {
             $this->activations()->delete();

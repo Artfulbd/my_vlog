@@ -438,7 +438,7 @@ trait GapicClientTrait
         );
     }
 
-    private static function getDefaultAudience(): ?string
+    private static function getDefaultAudience(): string|null
     {
         if (! defined('self::SERVICE_ADDRESS')) {
             return null;

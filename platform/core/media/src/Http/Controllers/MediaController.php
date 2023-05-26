@@ -231,7 +231,7 @@ class MediaController extends Controller
         ]);
     }
 
-    protected function transformOrderBy(?string $orderBy): array
+    protected function transformOrderBy(string|null $orderBy): array
     {
         $result = explode('-', $orderBy);
         if (! count($result) == 2) {
@@ -536,7 +536,7 @@ class MediaController extends Controller
 
             case 'rename':
                 foreach ($request->input('selected') as $item) {
-                    if (! $item['id'] || ! $item['name']) {
+                    if (! $item['id'] || empty($item['name'])) {
                         continue;
                     }
 

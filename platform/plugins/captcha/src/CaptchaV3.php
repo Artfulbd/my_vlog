@@ -16,11 +16,13 @@ class CaptchaV3 extends CaptchaContract
             return true;
         }
 
-        $response = Http::asForm()->post(self::RECAPTCHA_VERIFY_API_URL, [
-            'secret' => $this->secretKey,
-            'response' => $response,
-            'remoteip' => $clientIp,
-        ]);
+        $response = Http::asForm()
+            ->withoutVerifying()
+            ->post(self::RECAPTCHA_VERIFY_API_URL, [
+                'secret' => $this->secretKey,
+                'response' => $response,
+                'remoteip' => $clientIp,
+            ]);
 
         $data = $response->json();
 
@@ -40,7 +42,7 @@ class CaptchaV3 extends CaptchaContract
         return $score && $score >= $minScore;
     }
 
-    public function display(array $attributes = ['action' => 'form'], array $options = []): ?string
+    public function display(array $attributes = ['action' => 'form'], array $options = []): string|null
     {
         if (! $this->siteKey || ! $this->isEnabled()) {
             return null;
@@ -51,7 +53,7 @@ class CaptchaV3 extends CaptchaContract
         $action = Arr::get($attributes, 'action', 'form');
         $isRendered = $this->rendered;
 
-        add_filter(THEME_FRONT_FOOTER, function (?string $html) use ($isRendered, $uniqueId, $action): string {
+        add_filter(THEME_FRONT_FOOTER, function (string|null $html) use ($isRendered, $uniqueId, $action): string {
             $url = self::RECAPTCHA_CLIENT_API_URL . '?' . http_build_query([
                     'onload' => 'onloadCallback',
                     'render' => $this->siteKey,

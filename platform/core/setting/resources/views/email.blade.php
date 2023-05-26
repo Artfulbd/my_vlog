@@ -78,7 +78,7 @@
                             :placeholder="trans('core/setting::setting.email.mail_gun_domain_placeholder')"
                         />
 
-                        @if (! app()->environment('demo'))
+                        @if (! BaseHelper::hasDemoModeEnabled())
                             <x-core-setting::text-input
                                 name="email_mail_gun_secret"
                                 :label="trans('core/setting::setting.email.mail_gun_secret')"
@@ -106,7 +106,7 @@
                             :placeholder="trans('core/setting::setting.email.ses_key_placeholder')"
                         />
 
-                        @if (! app()->environment('demo'))
+                        @if (! BaseHelper::hasDemoModeEnabled())
                             <x-core-setting::text-input
                                 name="email_ses_secret"
                                 :label="trans('core/setting::setting.email.ses_secret')"
@@ -126,7 +126,7 @@
                     </div>
 
                     <div data-type="postmark" @class(['setting-wrapper', 'hidden' => setting('email_driver', config('mail.default')) !== 'postmark'])>
-                        @if (! app()->environment('demo'))
+                        @if (! BaseHelper::hasDemoModeEnabled())
                             <x-core-setting::text-input
                                 name="email_postmark_token"
                                 :label="trans('core/setting::setting.email.postmark_token')"
@@ -202,4 +202,6 @@
             <input type="email" class="form-control" name="email" placeholder="{{ trans('core/setting::setting.test_email_input_placeholder') }}">
         </div>
     </x-core-base::modal>
+
+    {!! $jsValidation !!}
 @endsection

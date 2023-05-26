@@ -2,12 +2,12 @@
 
 namespace Botble\GetStarted\Http\Controllers;
 
-use Botble\ACL\Models\User;
 use Botble\ACL\Repositories\Interfaces\UserInterface;
 use Botble\Base\Events\UpdatedContentEvent;
 use Botble\Base\Http\Controllers\BaseController;
 use Botble\Base\Http\Responses\BaseHttpResponse;
 use Botble\GetStarted\Http\Requests\GetStartedRequest;
+use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Hash;
 use Botble\Theme\Facades\ThemeOption;
 
@@ -51,10 +51,7 @@ class GetStartedController extends BaseController
 
                 setting()->save();
 
-                /**
-                 * @var User $user
-                 */
-                $user = auth()->user();
+                $user = Auth::user();
 
                 if ($user->username != config('core.base.general.demo.account.username', 'botble') &&
                     ! Hash::check($user->getAuthPassword(), config('core.base.general.demo.account.password', '159357'))
@@ -64,10 +61,7 @@ class GetStartedController extends BaseController
 
                 break;
             case 3:
-                /**
-                 * @var User $user
-                 */
-                $user = auth()->user();
+                $user = Auth::user();
 
                 $userRepository = app(UserInterface::class);
 

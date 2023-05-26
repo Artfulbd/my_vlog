@@ -4,6 +4,8 @@ namespace Botble\Language\Listeners;
 
 use Botble\Setting\Repositories\Interfaces\SettingInterface;
 use Botble\Theme\Events\ThemeRemoveEvent;
+use Botble\Theme\Facades\ThemeOption;
+use Botble\Widget\Models\Widget;
 use Botble\Widget\Repositories\Interfaces\WidgetInterface;
 use Exception;
 use Botble\Language\Facades\Language;
@@ -22,11 +24,9 @@ class ThemeRemoveListener
             $languages = Language::getActiveLanguage(['lang_code']);
 
             foreach ($languages as $language) {
-                $themeNameByLanguage = $event->theme . '-' . $language->lang_code;
+                $this->widgetRepository->deleteBy(['theme' => Widget::getThemeName($language->lang_code)]);
 
-                $this->widgetRepository->deleteBy(['theme' => $themeNameByLanguage]);
-
-                $this->settingRepository->deleteBy(['key', 'like', 'theme-' . $themeNameByLanguage . '-%']);
+                $this->settingRepository->deleteBy(['key', 'like', ThemeOption::getOptionKey('%', $language->lang_code)]);
             }
         } catch (Exception $exception) {
             info($exception->getMessage());

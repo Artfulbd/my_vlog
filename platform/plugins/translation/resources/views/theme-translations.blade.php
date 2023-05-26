@@ -20,7 +20,7 @@
                         </div>
                     </div>
                 </div>
-                <p class="note note-warning">{{ trans('plugins/translation::translation.theme_translations_instruction') }}</p>
+                <p class="note note-warning" style="margin-bottom: 65px;">{{ trans('plugins/translation::translation.theme_translations_instruction') }}</p>
 
                 {!! apply_filters('translation_theme_translation_header', null, $groups, $group) !!}
 

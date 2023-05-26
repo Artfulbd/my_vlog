@@ -9,8 +9,12 @@ abstract class ActionHookEvent
 {
     protected array $listeners = [];
 
-    public function addListener(string|array|null $hook, string|array|Closure $callback, int $priority = 20, int $arguments = 1): void
-    {
+    public function addListener(
+        string|array|null $hook,
+        string|array|Closure $callback,
+        int $priority = 20,
+        int $arguments = 1
+    ): void {
         if (! is_array($hook)) {
             $hook = [$hook];
         }

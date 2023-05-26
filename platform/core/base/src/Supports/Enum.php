@@ -13,9 +13,6 @@ use ReflectionException;
 
 abstract class Enum implements CastsAttributes, JsonSerializable
 {
-    /**
-     * Store existing constants in a static cache per object.
-     */
     protected static array $cache = [];
 
     protected static $langPath = 'core/base::enums';
@@ -127,7 +124,7 @@ abstract class Enum implements CastsAttributes, JsonSerializable
         return $result;
     }
 
-    public static function getLabel(?string $value): ?string
+    public static function getLabel(string|null $value): string|null
     {
         $key = sprintf(
             '%s.%s',
@@ -193,7 +190,7 @@ abstract class Enum implements CastsAttributes, JsonSerializable
         ];
     }
 
-    public function label(): ?string
+    public function label(): string|null
     {
         return self::getLabel($this->getValue());
     }

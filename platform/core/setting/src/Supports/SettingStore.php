@@ -2,42 +2,29 @@
 
 namespace Botble\Setting\Supports;
 
+use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Support\Arr;
+use Illuminate\Support\Facades\Cache;
 
 abstract class SettingStore
 {
-    /**
-     * The settings data.
-     */
     protected array $data = [];
 
-    /**
-     * Whether the store has changed since it was last loaded.
-     */
     protected bool $unsaved = false;
 
-    /**
-     * Whether the settings data are loaded.
-     */
     protected bool $loaded = false;
 
-    /**
-     * Get a specific key from the settings data.
-     *
-     * @param mixed $default Optional default value.
-     *
-     * @return mixed
-     */
-    public function get(string|array $key, $default = null)
+    protected string $cacheKey = 'cms_settings_cache';
+
+    protected int $settingTime = 86400;
+
+    public function get(string|array $key, mixed $default = null): mixed
     {
         $this->load();
 
         return Arr::get($this->data, $key, $default);
     }
 
-    /**
-     * Determine if a key exists in the settings data.
-     */
     public function has(string $key): bool
     {
         $this->load();
@@ -45,14 +32,7 @@ abstract class SettingStore
         return Arr::has($this->data, $key);
     }
 
-    /**
-     * Set a specific key to a value in the settings data.
-     *
-     * @param string|array $key Key string or associative array of key => value
-     * @param mixed $value Optional only if the first argument is an array
-     * @return $this
-     */
-    public function set(string|array $key, $value = null): self
+    public function set(string|array $key, mixed $value = null): self
     {
         $this->load();
         $this->unsaved = true;
@@ -68,9 +48,6 @@ abstract class SettingStore
         return $this;
     }
 
-    /**
-     * Unset a key in the settings data.
-     */
     public function forget(string $key): self
     {
         $this->unsaved = true;
@@ -82,9 +59,6 @@ abstract class SettingStore
         return $this;
     }
 
-    /**
-     * Unset all keys in the settings data.
-     */
     public function forgetAll(): self
     {
         $this->unsaved = true;
@@ -93,9 +67,6 @@ abstract class SettingStore
         return $this;
     }
 
-    /**
-     * Get all settings data.
-     */
     public function all(): array
     {
         $this->load();
@@ -103,26 +74,20 @@ abstract class SettingStore
         return $this->data;
     }
 
-    /**
-     * Save any changes done to the settings data.
-     */
     public function save(): bool
     {
         if (! $this->unsaved) {
-            // either nothing has been changed, or data has not been loaded, so
-            // do nothing by returning early
             return false;
         }
 
         $this->write($this->data);
         $this->unsaved = false;
 
+        $this->clearCache();
+
         return true;
     }
 
-    /**
-     * Make sure data is loaded.
-     */
     public function load(bool $force = false): void
     {
         if (! $this->loaded || $force) {
@@ -131,13 +96,16 @@ abstract class SettingStore
         }
     }
 
-    /**
-     * Read the data from the store.
-     */
+    protected function clearCache(): void
+    {
+        Cache::forget($this->cacheKey);
+    }
+
     abstract protected function read(): array;
 
-    /**
-     * Write the data into the store.
-     */
     abstract protected function write(array $data): void;
+
+    abstract public function delete(array $keys = [], array $except = []);
+
+    abstract public function newQuery(): Builder;
 }

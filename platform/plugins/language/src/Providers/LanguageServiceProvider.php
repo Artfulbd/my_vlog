@@ -3,6 +3,9 @@
 namespace Botble\Language\Providers;
 
 use Botble\Base\Facades\Assets;
+use Botble\Base\Facades\DashboardMenu;
+use Botble\Base\Facades\Html;
+use Botble\Base\Facades\MetaBox;
 use Botble\Base\Forms\FormAbstract;
 use Botble\Base\Models\BaseModel;
 use Botble\Base\Traits\LoadAndPublishDataTrait;
@@ -19,7 +22,9 @@ use Botble\Language\Repositories\Eloquent\LanguageRepository;
 use Botble\Language\Repositories\Interfaces\LanguageInterface;
 use Botble\Language\Repositories\Interfaces\LanguageMetaInterface;
 use Botble\Menu\Models\Menu;
-use Botble\Base\Facades\Html;
+use Botble\Table\CollectionDataTable;
+use Botble\Table\EloquentDataTable;
+use Botble\Theme\Facades\Theme;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Collection;
 use Illuminate\Database\Eloquent\Model;
@@ -29,13 +34,9 @@ use Illuminate\Routing\Events\RouteMatched;
 use Illuminate\Routing\Router;
 use Illuminate\Support\Arr;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\Route;
 use Illuminate\Support\ServiceProvider;
 use Illuminate\Support\Str;
-use Botble\Base\Facades\MetaBox;
-use Illuminate\Support\Facades\Route;
-use Botble\Theme\Facades\Theme;
-use Botble\Table\CollectionDataTable;
-use Botble\Table\EloquentDataTable;
 
 class LanguageServiceProvider extends ServiceProvider
 {
@@ -86,16 +87,15 @@ class LanguageServiceProvider extends ServiceProvider
 
         if (! $this->app->runningInConsole() && is_plugin_active('language')) {
             $this->app['events']->listen(RouteMatched::class, function () {
-                dashboard_menu()
-                    ->registerItem([
-                        'id' => 'cms-plugins-language',
-                        'priority' => 2,
-                        'parent_id' => 'cms-core-settings',
-                        'name' => 'plugins/language::language.name',
-                        'icon' => null,
-                        'url' => route('languages.index'),
-                        'permissions' => ['languages.index'],
-                    ]);
+                DashboardMenu::registerItem([
+                    'id' => 'cms-plugins-language',
+                    'priority' => 2,
+                    'parent_id' => 'cms-core-settings',
+                    'name' => 'plugins/language::language.name',
+                    'icon' => null,
+                    'url' => route('languages.index'),
+                    'permissions' => ['languages.index'],
+                ]);
 
                 Assets::addScriptsDirectly('vendor/core/plugins/language/js/language-global.js')
                     ->addStylesDirectly(['vendor/core/plugins/language/css/language.css']);
@@ -173,22 +173,31 @@ class LanguageServiceProvider extends ServiceProvider
 
             add_filter(BASE_FILTER_BEFORE_RENDER_FORM, [$this, 'changeDataBeforeRenderingForm'], 1134, 2);
 
-            add_filter('setting_email_template_meta_boxes', function (?string $data, array $params = []): string {
+            add_filter('setting_email_template_meta_boxes', function (string|null $data, array $params = []): string {
                 $route = 'setting.email.template.edit';
 
-                return $data . view('plugins/language::partials.admin-list-language-chooser', compact('route', 'params'))->render();
+                return $data . view(
+                    'plugins/language::partials.admin-list-language-chooser',
+                    compact('route', 'params')
+                )->render();
             }, 55, 2);
 
-            add_filter('setting_email_template_path', function (string $path, string $module, string $templateKey): string {
-                $currentLocale = is_in_admin(true) ? Language::getCurrentAdminLocale() : Language::getCurrentLocale();
-                $locale = $currentLocale !== Language::getDefaultLocale() ? $currentLocale : null;
+            add_filter(
+                'setting_email_template_path',
+                function (string $path, string $module, string $templateKey): string {
+                    $currentLocale = is_in_admin(true) ? Language::getCurrentAdminLocale() : Language::getCurrentLocale(
+                    );
+                    $locale = $currentLocale !== Language::getDefaultLocale() ? $currentLocale : null;
 
-                if ($locale && in_array($locale, array_keys(Language::getSupportedLocales()))) {
-                    return "$module/$locale/$templateKey.tpl";
-                }
+                    if ($locale && in_array($locale, array_keys(Language::getSupportedLocales()))) {
+                        return "$module/$locale/$templateKey.tpl";
+                    }
 
-                return $path;
-            }, 55, 3);
+                    return $path;
+                },
+                55,
+                3
+            );
 
             add_filter('setting_email_subject_key', function (string $key): string {
                 $currentLocale = is_in_admin(true) ? Language::getCurrentAdminLocale() : Language::getCurrentLocale();
@@ -218,7 +227,7 @@ class LanguageServiceProvider extends ServiceProvider
         }
     }
 
-    public function addLanguageMetaBoxForThemeOptionsAndWidgets(?string $data, string $screen): ?string
+    public function addLanguageMetaBoxForThemeOptionsAndWidgets(string|null $data, string $screen): string|null
     {
         $route = null;
         switch ($screen) {
@@ -262,7 +271,7 @@ class LanguageServiceProvider extends ServiceProvider
         return $prefix;
     }
 
-    public function languageMetaField(): ?string
+    public function languageMetaField(): string|null
     {
         $languages = Language::getActiveLanguage([
             'lang_code',
@@ -335,7 +344,7 @@ class LanguageServiceProvider extends ServiceProvider
         )->render();
     }
 
-    public function checkCurrentLanguage(array|Collection $languages, ?string $value): ?LanguageModel
+    public function checkCurrentLanguage(array|Collection $languages, string|null $value): ?LanguageModel
     {
         $request = $this->app['request'];
         $currentLanguage = null;
@@ -409,7 +418,7 @@ class LanguageServiceProvider extends ServiceProvider
         echo null;
     }
 
-    public function getCurrentAdminLanguage(Request $request, ?Model $data = null): ?string
+    public function getCurrentAdminLanguage(Request $request, ?Model $data = null): string|null
     {
         $code = null;
         if ($request->has('ref_lang')) {
@@ -461,8 +470,10 @@ class LanguageServiceProvider extends ServiceProvider
         return $headings;
     }
 
-    public function addLanguageColumn(EloquentDataTable|CollectionDataTable $data, string|Model $model): EloquentDataTable|CollectionDataTable
-    {
+    public function addLanguageColumn(
+        EloquentDataTable|CollectionDataTable $data,
+        string|Model $model
+    ): EloquentDataTable|CollectionDataTable {
         if ($model && in_array(get_class($model), Language::supportedModels())) {
             $route = $this->getRoutes();
 
@@ -540,7 +551,7 @@ class LanguageServiceProvider extends ServiceProvider
         return $this->getDataByCurrentLanguageCode($data, Language::getCurrentLocaleCode());
     }
 
-    protected function getDataByCurrentLanguageCode(Builder|Model $data, ?string $languageCode): Builder|Model
+    protected function getDataByCurrentLanguageCode(Builder|Model $data, string|null $languageCode): Builder|Model
     {
         $model = $data->getModel();
 
@@ -750,7 +761,7 @@ class LanguageServiceProvider extends ServiceProvider
         return $form;
     }
 
-    public function updateMenuNodeUrl(?string $value): string
+    public function updateMenuNodeUrl(string|null $value): string
     {
         if (is_in_admin() || in_array($value, ['#', 'javascript:void(0)'])) {
             return $value;

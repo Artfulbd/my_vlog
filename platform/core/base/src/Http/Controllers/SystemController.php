@@ -48,7 +48,7 @@ class SystemController extends Controller
         $systemEnv = SystemManagement::getSystemEnv();
         $serverEnv = SystemManagement::getServerEnv();
 
-        $requiredPhpVersion = Arr::get($composerArray, 'require.php', '^8.0.2');
+        $requiredPhpVersion = Arr::get($composerArray, 'require.php', get_minimum_php_version());
         $requiredPhpVersion = str_replace('^', '', $requiredPhpVersion);
         $requiredPhpVersion = str_replace('~', '', $requiredPhpVersion);
 
@@ -212,22 +212,24 @@ class SystemController extends Controller
         $updateId = $request->input('update_id');
         $version = $request->input('version');
 
-        switch ((int) $request->input('step', 1)) {
-            case 1:
-                event(new UpdatingEvent());
+        BaseHelper::maximumExecutionTimeAndMemoryLimit();
 
-                if ($core->downloadUpdate($updateId, $version)) {
+        try {
+            switch ($request->integer('step', 1)) {
+                case 1:
+                    event(new UpdatingEvent());
+
+                    if ($core->downloadUpdate($updateId, $version)) {
+                        return response()->json([
+                            'message' => __('The update files have been downloaded successfully.'),
+                        ]);
+                    }
+
                     return response()->json([
-                        'message' => __('The update files have been downloaded successfully.'),
-                    ]);
-                }
+                        'message' => __('Could not download updated file. Please check your license or your internet network.'),
+                    ], 422);
 
-                return response()->json([
-                    'message' => __('Could not download updated file. Please check your license or your internet network.'),
-                ], 422);
-
-            case 2:
-                try {
+                case 2:
                     if ($core->updateFilesAndDatabase($version)) {
                         return response()->json([
                             'message' => __('Your files and database have been updated successfully.'),
@@ -237,25 +239,28 @@ class SystemController extends Controller
                     return response()->json([
                         'message' => __('Could not update files & database.'),
                     ], 422);
-                } catch (Throwable $exception) {
+
+                case 3:
+                    $core->publishUpdateAssets();
+
                     return response()->json([
-                        'message' => $exception->getMessage(),
-                    ], 422);
-                }
+                        'message' => __('Your asset files have been published successfully.'),
+                    ]);
+                case 4:
+                    $core->cleanUpUpdate();
 
-            case 3:
-                $core->publishUpdateAssets();
+                    event(new UpdatedEvent());
 
-                return response()->json([
-                    'message' => __('Your asset files have been published successfully.'),
-                ]);
-            case 4:
-                $core->cleanUpUpdate();
-                event(new UpdatedEvent());
+                    return response()->json([
+                        'message' => __('Your system have been cleaned up successfully.'),
+                    ]);
+            }
+        } catch (Throwable $exception) {
+            $core->logError($exception);
 
-                return response()->json([
-                    'message' => __('Your system have been cleaned up successfully.'),
-                ]);
+            return response()->json([
+                'message' => $exception->getMessage() . ' - ' . $exception->getFile() . ':' . $exception->getLine(),
+            ], 422);
         }
 
         return response()->json([

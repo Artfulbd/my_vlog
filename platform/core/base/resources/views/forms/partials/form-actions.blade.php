@@ -25,7 +25,7 @@
 </div>
 <div id="waypoint"></div>
 <div class="form-actions form-actions-fixed-top hidden">
-    {!! Breadcrumbs::render('main', page_title()->getTitle(false)) !!}
+    {!! Breadcrumbs::render('main', PageTitle::getTitle(false)) !!}
     <div class="btn-set">
         @php do_action(BASE_ACTION_FORM_ACTIONS, 'fixed-top') @endphp
         @if (!isset($onlySave) || !$onlySave)

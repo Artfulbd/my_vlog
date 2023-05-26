@@ -4,6 +4,7 @@ namespace Botble\Base\Providers;
 
 use Botble\Base\Facades\Assets;
 use Botble\ACL\Models\UserMeta;
+use Botble\Base\Facades\BaseHelper;
 use Illuminate\Contracts\View\Factory;
 use Illuminate\Contracts\View\View;
 use Illuminate\Support\Facades\Auth;
@@ -19,7 +20,7 @@ class ComposerServiceProvider extends ServiceProvider
 
             $defaultTheme = setting('default_admin_theme', config('core.base.general.default-theme'));
 
-            if (Auth::check() && ! session()->has('admin-theme') && ! app()->environment('demo')) {
+            if (Auth::check() && ! session()->has('admin-theme') && ! BaseHelper::hasDemoModeEnabled()) {
                 $activeTheme = UserMeta::getMeta('admin-theme', $defaultTheme);
             } elseif (session()->has('admin-theme')) {
                 $activeTheme = session('admin-theme');
@@ -41,8 +42,8 @@ class ComposerServiceProvider extends ServiceProvider
         });
 
         $view->composer(['core/media::config'], function () {
-            $mediaPermissions = RvMedia::getConfig('permissions');
-            if (Auth::check() && ! Auth::user()->isSuperUser()) {
+            $mediaPermissions = RvMedia::getConfig('permissions', []);
+            if (Auth::check() && ! Auth::user()->isSuperUser() && Auth::user()->permissions) {
                 $mediaPermissions = array_intersect(array_keys(Auth::user()->permissions), $mediaPermissions);
             }
 

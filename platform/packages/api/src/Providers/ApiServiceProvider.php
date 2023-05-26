@@ -4,10 +4,11 @@ namespace Botble\Api\Providers;
 
 use Botble\Api\Facades\ApiHelper;
 use Botble\Api\Http\Middleware\ForceJsonResponseMiddleware;
+use Botble\Base\Facades\DashboardMenu;
+use Botble\Base\Traits\LoadAndPublishDataTrait;
 use Illuminate\Foundation\AliasLoader;
 use Illuminate\Routing\Events\RouteMatched;
 use Illuminate\Support\ServiceProvider;
-use Botble\Base\Traits\LoadAndPublishDataTrait;
 
 class ApiServiceProvider extends ServiceProvider
 {
@@ -15,7 +16,9 @@ class ApiServiceProvider extends ServiceProvider
 
     public function register(): void
     {
-        AliasLoader::getInstance()->alias('ApiHelper', ApiHelper::class);
+        if (class_exists('ApiHelper')) {
+            AliasLoader::getInstance()->alias('ApiHelper', ApiHelper::class);
+        }
     }
 
     public function boot(): void
@@ -37,16 +40,15 @@ class ApiServiceProvider extends ServiceProvider
                 $this->app['router']->pushMiddlewareToGroup('api', ForceJsonResponseMiddleware::class);
             }
 
-            dashboard_menu()
-                ->registerItem([
-                    'id' => 'cms-packages-api',
-                    'priority' => 9999,
-                    'parent_id' => 'cms-core-settings',
-                    'name' => 'packages/api::api.settings',
-                    'icon' => null,
-                    'url' => route('api.settings'),
-                    'permissions' => ['api.settings'],
-                ]);
+            DashboardMenu::registerItem([
+                'id' => 'cms-packages-api',
+                'priority' => 9999,
+                'parent_id' => 'cms-core-settings',
+                'name' => 'packages/api::api.settings',
+                'icon' => null,
+                'url' => route('api.settings'),
+                'permissions' => ['api.settings'],
+            ]);
         });
 
         $this->app->booted(function () {

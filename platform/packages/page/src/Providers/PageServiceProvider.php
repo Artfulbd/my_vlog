@@ -2,13 +2,16 @@
 
 namespace Botble\Page\Providers;
 
+use Botble\Base\Facades\DashboardMenu;
 use Botble\Base\Traits\LoadAndPublishDataTrait;
 use Botble\Page\Models\Page;
 use Botble\Page\Repositories\Caches\PageCacheDecorator;
 use Botble\Page\Repositories\Eloquent\PageRepository;
 use Botble\Page\Repositories\Interfaces\PageInterface;
 use Botble\Shortcode\View\View;
+use Botble\Theme\Facades\AdminBar;
 use Illuminate\Routing\Events\RouteMatched;
+use Illuminate\Support\Facades\View as ViewFacade;
 use Illuminate\Support\ServiceProvider;
 
 /**
@@ -38,7 +41,7 @@ class PageServiceProvider extends ServiceProvider
             ->loadMigrations();
 
         $this->app['events']->listen(RouteMatched::class, function () {
-            dashboard_menu()->registerItem([
+            DashboardMenu::registerItem([
                 'id' => 'cms-core-page',
                 'priority' => 2,
                 'parent_id' => null,
@@ -49,12 +52,17 @@ class PageServiceProvider extends ServiceProvider
             ]);
 
             if (function_exists('admin_bar')) {
-                admin_bar()->registerLink(trans('packages/page::pages.menu_name'), route('pages.create'), 'add-new', 'pages.create');
+                AdminBar::registerLink(
+                    trans('packages/page::pages.menu_name'),
+                    route('pages.create'),
+                    'add-new',
+                    'pages.create'
+                );
             }
         });
 
         if (function_exists('shortcode')) {
-            view()->composer(['packages/page::themes.page'], function (View $view) {
+            ViewFacade::composer(['packages/page::themes.page'], function (View $view) {
                 $view->withShortcodes();
             });
         }

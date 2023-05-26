@@ -19,6 +19,7 @@ use Botble\Base\Events\CreatedContentEvent;
 use Botble\Base\Events\DeletedContentEvent;
 use Botble\Base\Events\UpdatedContentEvent;
 use Botble\Base\Facades\Assets;
+use Botble\Base\Facades\BaseHelper;
 use Botble\Base\Facades\PageTitle;
 use Botble\Base\Forms\FormBuilder;
 use Botble\Base\Http\Controllers\BaseController;
@@ -319,7 +320,7 @@ class UserController extends BaseController
 
     public function getTheme(string $theme)
     {
-        if (Auth::check() && ! app()->environment('demo')) {
+        if (Auth::check() && ! BaseHelper::hasDemoModeEnabled()) {
             UserMeta::setMeta('admin-theme', $theme);
         }
 

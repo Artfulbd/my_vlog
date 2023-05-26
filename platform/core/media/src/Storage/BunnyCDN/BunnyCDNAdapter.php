@@ -32,12 +32,8 @@ class BunnyCDNAdapter implements FilesystemAdapter, PublicUrlGenerator, Checksum
 {
     use CalculateChecksumFromStream;
 
-    protected string $pullZoneURL;
-
-    public function __construct(protected BunnyCDNClient $client, string $pullZoneURL = '')
+    public function __construct(protected BunnyCDNClient $client, protected string $pullZoneURL = '')
     {
-        $this->pullZoneURL = $pullZoneURL;
-
         if (func_num_args() > 2 && (string)func_get_arg(2) !== '') {
             throw new RuntimeException('PrefixPath is no longer supported directly. Use PathPrefixedAdapter instead: https://flysystem.thephpleague.com/docs/adapter/path-prefixing/');
         }

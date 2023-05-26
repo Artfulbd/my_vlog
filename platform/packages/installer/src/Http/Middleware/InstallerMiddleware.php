@@ -13,7 +13,7 @@ abstract class InstallerMiddleware
             return true;
         }
 
-        if (Helper::isConnectedDatabase() && ! File::exists(storage_path('installing'))) {
+        if (! File::exists(storage_path('installing')) && Helper::isConnectedDatabase()) {
             return true;
         }
 

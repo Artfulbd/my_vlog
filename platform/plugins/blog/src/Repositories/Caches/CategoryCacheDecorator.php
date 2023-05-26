@@ -17,7 +17,7 @@ class CategoryCacheDecorator extends CacheAbstractDecorator implements CategoryI
         return $this->getDataIfExistCache(__FUNCTION__, func_get_args());
     }
 
-    public function getFeaturedCategories(?int $limit, array $with = []): Collection
+    public function getFeaturedCategories(int|null $limit, array $with = []): Collection
     {
         return $this->getDataIfExistCache(__FUNCTION__, func_get_args());
     }

@@ -7,6 +7,8 @@ use Botble\Base\Events\DeletedContentEvent;
 use Botble\Base\Events\UpdatedContentEvent;
 use Botble\Base\Traits\LoadAndPublishDataTrait;
 use Botble\Sitemap\Sitemap;
+use Illuminate\Contracts\Cache\Repository;
+use Illuminate\Contracts\Routing\ResponseFactory;
 use Illuminate\Support\ServiceProvider;
 
 class SitemapServiceProvider extends ServiceProvider
@@ -42,10 +44,10 @@ class SitemapServiceProvider extends ServiceProvider
 
             return new Sitemap(
                 $config,
-                $app['Illuminate\Cache\Repository'],
+                $app[Repository::class],
                 $app['config'],
                 $app['files'],
-                $app['Illuminate\Contracts\Routing\ResponseFactory'],
+                $app[ResponseFactory::class],
                 $app['view']
             );
         });

@@ -72,9 +72,9 @@ export default {
         Compatible,
     },
     created() {
-        vueApp.eventBus.$on('assignInstalled', this.assignInstalled)
-        vueApp.eventBus.$on('assignActivated', this.assignActivated)
-        vueApp.eventBus.$on('onError', this.onError)
+        $event.on('assignInstalled', this.assignInstalled)
+        $event.on('assignActivated', this.assignActivated)
+        $event.on('onError', this.onError)
 
         this.setNamePlugin()
         this.checkVersion()
@@ -87,16 +87,16 @@ export default {
             this.pluginName = packageName.substring(packageName.indexOf('/') + 1)
         },
         detail() {
-            vueApp.eventBus.$emit('detail', this.data)
+            $event.emit('detail', this.data)
         },
         install() {
             this.installing = true
-            vueApp.eventBus.$emit('install', this.data.id)
+            $event.emit('install', this.data.id)
         },
         changeStatus() {
             if (!this.activated) {
                 this.activating = true
-                vueApp.eventBus.$emit('changeStatus', this.pluginName)
+                $event.emit('changeStatus', this.pluginName)
             }
         },
         assignInstalled(name) {

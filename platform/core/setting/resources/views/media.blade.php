@@ -21,7 +21,7 @@
                     class="setting-select-options"
                 />
 
-                <div data-type="s3" @class(['setting-wrapper', 'hidden' => RvMedia::getMediaDriver() !== 's3'])>
+                <div data-type="s3" @class(['setting-wrapper', 'hidden' => old('media_driver', RvMedia::getMediaDriver()) !== 's3'])>
                     <x-core-setting::text-input
                         name="media_aws_access_key_id"
                         :label="trans('core/setting::setting.media.aws_access_key_id')"
@@ -65,7 +65,7 @@
                     />
                 </div>
 
-                <div data-type="do_spaces" @class(['setting-wrapper', 'hidden' => RvMedia::getMediaDriver() !== 'do_spaces'])>
+                <div data-type="do_spaces" @class(['setting-wrapper', 'hidden' => old('media_driver', RvMedia::getMediaDriver()) !== 'do_spaces'])>
                     <x-core-setting::text-input
                         name="media_do_spaces_access_key_id"
                         :label="trans('core/setting::setting.media.do_spaces_access_key_id')"
@@ -117,7 +117,7 @@
                     />
                 </div>
 
-                <div data-type="wasabi" @class(['setting-wrapper', 'hidden' => RvMedia::getMediaDriver() !== 'wasabi'])>
+                <div data-type="wasabi" @class(['setting-wrapper', 'hidden' => old('media_driver', RvMedia::getMediaDriver()) !== 'wasabi'])>
                     <x-core-setting::text-input
                         name="media_wasabi_access_key_id"
                         :label="trans('core/setting::setting.media.wasabi_access_key_id')"
@@ -154,7 +154,7 @@
                     />
                 </div>
 
-                <div data-type="bunnycdn" @class(['setting-wrapper', 'hidden' => RvMedia::getMediaDriver() !== 'bunnycdn'])>
+                <div data-type="bunnycdn" @class(['setting-wrapper', 'hidden' => old('media_driver', RvMedia::getMediaDriver()) !== 'bunnycdn'])>
                     <x-core-setting::text-input
                         name="media_bunnycdn_hostname"
                         :label="trans('core/setting::setting.media.bunnycdn_hostname')"
@@ -246,12 +246,12 @@
                 <x-core-setting::on-off
                     name="media_watermark_enabled"
                     :label="trans('core/setting::setting.media.enable_watermark')"
-                    :value="setting('media_watermark_enabled', RvMedia::getConfig('watermark.enabled'))"
+                    :value="setting('media_watermark_enabled', RvMedia::getConfig('watermark.enabled', false))"
                     class="setting-selection-option"
                     data-target="#media-watermark-settings"
                 />
 
-                <div id="media-watermark-settings" @class(['mb-4 border rounded-top rounded-bottom p-3 bg-light', 'd-none' => ! setting('media_watermark_enabled', RvMedia::getConfig('watermark.enabled'))])>
+                <div id="media-watermark-settings" @class(['mb-4 border rounded-top rounded-bottom p-3 bg-light', 'd-none' => ! setting('media_watermark_enabled', RvMedia::getConfig('watermark.enabled', false))])>
                     <x-core-setting::form-group>
                         {{ Form::helper(trans('core/setting::setting.watermark_description')) }}
                     </x-core-setting::form-group>
@@ -406,4 +406,6 @@
     >
         {!! trans('core/setting::setting.generate_thumbnails_description') !!}
     </x-core-base::modal>
+
+    {!! $jsValidation !!}
 @endsection

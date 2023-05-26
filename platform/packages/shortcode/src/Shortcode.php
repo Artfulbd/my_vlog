@@ -8,14 +8,11 @@ use Illuminate\Support\HtmlString;
 
 class Shortcode
 {
-    protected ShortcodeCompiler $compiler;
-
-    public function __construct(ShortcodeCompiler $compiler)
+    public function __construct(protected ShortcodeCompiler $compiler)
     {
-        $this->compiler = $compiler;
     }
 
-    public function register(string $key, ?string $name, ?string $description = null, $callback = null, string $previewImage = ''): Shortcode
+    public function register(string $key, string|null $name, string|null $description = null, $callback = null, string $previewImage = ''): Shortcode
     {
         $this->compiler->add($key, $name, $description, $callback, $previewImage);
 
@@ -43,7 +40,7 @@ class Shortcode
         return new HtmlString($html);
     }
 
-    public function strip(?string $value): ?string
+    public function strip(string|null $value): string|null
     {
         return $this->compiler->strip($value);
     }

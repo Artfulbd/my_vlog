@@ -52,18 +52,18 @@ class DropZoneUploadHandler extends AbstractHandler
         return new ParallelSave($this->file, $this, $chunkStorage);
     }
 
-    public function isFirstChunk()
+    public function isFirstChunk(): bool
     {
         return 1 == $this->currentChunk;
     }
 
-    public function isLastChunk()
+    public function isLastChunk(): bool
     {
         // the bytes start from zero, remove 1 byte from total
         return $this->currentChunk == $this->chunksTotal;
     }
 
-    public function isChunkedUpload()
+    public function isChunkedUpload(): bool
     {
         return $this->chunksTotal > 1;
     }

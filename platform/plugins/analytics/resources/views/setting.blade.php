@@ -20,7 +20,7 @@
         helper-text="<a href='https://developers.google.com/analytics/devguides/reporting/data/v1/property-id' target='_blank'>https://developers.google.com/analytics/devguides/reporting/data/v1/property-id</a>"
     />
 
-    @if (! app()->environment('demo'))
+    @if (! BaseHelper::hasDemoModeEnabled())
         <x-core-setting::form-group>
             <label class="text-title-field" for="analytics_service_account_credentials">{{ trans('plugins/analytics::analytics.settings.json_credential') }}</label>
             <textarea class="next-input form-control" name="analytics_service_account_credentials" id="analytics_service_account_credentials" rows="5" placeholder="{{ trans('plugins/analytics::analytics.settings.json_credential_description') }}">{{ setting('analytics_service_account_credentials') }}</textarea>

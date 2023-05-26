@@ -4,7 +4,6 @@ namespace Botble\AuditLog\Listeners;
 
 use Botble\ACL\Models\User;
 use Botble\AuditLog\Models\AuditHistory;
-use Carbon\Carbon;
 use Illuminate\Auth\Events\Login;
 use Illuminate\Http\Request;
 
@@ -19,7 +18,7 @@ class LoginListener
         $user = $event->user;
 
         if ($user instanceof User) {
-            AuditHistory::query()->insert([
+            AuditHistory::query()->create([
                 'user_agent' => $this->request->userAgent(),
                 'ip_address' => $this->request->ip(),
                 'module' => 'to the system',
@@ -29,8 +28,6 @@ class LoginListener
                 'reference_id' => $user->getKey(),
                 'reference_name' => $user->name,
                 'type' => 'info',
-                'created_at' => Carbon::now(),
-                'updated_at' => Carbon::now(),
             ]);
         }
     }

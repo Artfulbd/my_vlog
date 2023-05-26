@@ -31,7 +31,7 @@ if (! function_exists('get_object_image')) {
     /**
      * @deprecated since 5.7
      */
-    function get_object_image(string $image, string|null $size = null, bool $relativePath = false): ?string
+    function get_object_image(string $image, string|null $size = null, bool $relativePath = false): string|null
     {
         return RvMedia::getImageUrl($image, $size, $relativePath, RvMedia::getDefaultImage());
     }

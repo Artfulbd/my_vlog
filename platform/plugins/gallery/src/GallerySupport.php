@@ -145,7 +145,7 @@ class GallerySupport
         return $this;
     }
 
-    public function getGalleriesPageUrl(): ?string
+    public function getGalleriesPageUrl(): string|null
     {
         $pageId = theme_option('galleries_page_id');
 

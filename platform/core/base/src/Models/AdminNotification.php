@@ -6,6 +6,7 @@ use Botble\Base\Casts\SafeContent;
 use Carbon\Carbon;
 use Illuminate\Database\Eloquent\MassPrunable;
 use Illuminate\Database\Query\Builder;
+use Illuminate\Support\Facades\Auth;
 
 class AdminNotification extends BaseModel
 {
@@ -53,7 +54,7 @@ class AdminNotification extends BaseModel
 
     public function scopeHasPermission(BaseQueryBuilder $query): void
     {
-        $user = auth()->user();
+        $user = Auth::user();
 
         if (! $user->isSuperUser()) {
             $query->where(function (BaseQueryBuilder $query) use ($user) {
@@ -66,7 +67,7 @@ class AdminNotification extends BaseModel
 
     public function isAbleToAccess(): bool
     {
-        $user = auth()->user();
+        $user = Auth::user();
 
         return ! $this->permission || $user->isSuperUser() || $user->hasPermission($this->permission);
     }

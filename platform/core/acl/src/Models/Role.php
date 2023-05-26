@@ -6,7 +6,6 @@ use Botble\ACL\Traits\PermissionTrait;
 use Botble\Base\Casts\SafeContent;
 use Botble\Base\Facades\BaseHelper;
 use Botble\Base\Models\BaseModel;
-use Illuminate\Database\Eloquent\Casts\Attribute;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\BelongsToMany;
 
@@ -32,17 +31,7 @@ class Role extends BaseModel
         'description' => SafeContent::class,
     ];
 
-    protected function permissions(): Attribute
-    {
-        return Attribute::make(
-            get: function ($value) {
-                return json_decode($value ?: '', true) ?: [];
-            },
-            set: fn ($value) => $value ? json_encode($value) : ''
-        );
-    }
-
-    public function delete(): ?bool
+    public function delete(): bool|null
     {
         if ($this->exists) {
             $this->users()->detach();

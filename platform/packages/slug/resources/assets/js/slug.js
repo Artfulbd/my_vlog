@@ -1,48 +1,51 @@
 class SlugBoxManagement {
     init() {
-        let $slugBox = $('#edit-slug-box')
+        let $slugBox = $(document).find('#edit-slug-box')
+        let $slugInput = $(document).find('#editable-post-name')
+        let $slugId = $(document).find('#slug_id')
+        let $changeSlug = $(document).find('#change_slug')
+        let $currentSlug = $(document).find('#current-slug')
+        let $permalink = $(document).find('#sample-permalink')
+
         $(document).on('click', '#change_slug', (event) => {
-            $('.default-slug').unwrap()
-            let $slugInput = $('#editable-post-name')
+            $(document).find('.default-slug').unwrap()
             $slugInput.html(
                 '<input type="text" id="new-post-slug" class="form-control" value="' +
                     $slugInput.text() +
                     '" autocomplete="off">'
             )
-            $('#edit-slug-box .cancel').show()
-            $('#edit-slug-box .save').show()
+            $slugBox.find('.cancel').show()
+            $slugBox.find('.save').show()
             $(event.currentTarget).hide()
         })
 
         $(document).on('click', '#edit-slug-box .cancel', () => {
-            let currentSlug = $('#current-slug').val()
-            let $permalink = $('#sample-permalink')
+            let currentSlug = $currentSlug.val()
+
             $permalink.html(
                 '<a class="permalink" href="' +
-                    $('#slug_id').data('view') +
+                    $slugId.data('view') +
                     currentSlug.replace('/', '') +
                     '">' +
                     $permalink.html() +
                     '</a>'
             )
-            $('#editable-post-name').text(currentSlug)
-            $('#edit-slug-box .cancel').hide()
-            $('#edit-slug-box .save').hide()
-            $('#change_slug').show()
+            $slugInput.text(currentSlug)
+            $slugBox.find('.cancel').hide()
+            $slugBox.find('.save').hide()
+            $changeSlug.show()
         })
 
         let createSlug = (name, id, exist) => {
             $.ajax({
-                url: $('#slug_id').data('url'),
+                url: $slugId.data('url'),
                 type: 'POST',
                 data: {
                     value: name,
                     slug_id: id,
-                    model: $('input[name=model]').val(),
+                    model: $(document).find('input[name=model]').val(),
                 },
                 success: (data) => {
-                    let $permalink = $('#sample-permalink')
-                    let $slugId = $('#slug_id')
                     if (exist) {
                         $permalink.find('.permalink').prop('href', $slugId.data('view') + data.replace('/', ''))
                     } else {
@@ -56,13 +59,13 @@ class SlugBoxManagement {
                         )
                     }
 
-                    $('.page-url-seo p').text($slugId.data('view') + data.replace('/', ''))
+                    $(document).find('.page-url-seo p').text($slugId.data('view') + data.replace('/', ''))
 
-                    $('#editable-post-name').text(data)
-                    $('#current-slug').val(data)
-                    $('#edit-slug-box .cancel').hide()
-                    $('#edit-slug-box .save').hide()
-                    $('#change_slug').show()
+                    $slugInput.text(data)
+                    $currentSlug.val(data)
+                    $slugBox.find('.cancel').hide()
+                    $slugBox.find('.save').hide()
+                    $changeSlug.show()
                     $slugBox.removeClass('hidden')
                 },
                 error: (data) => {
@@ -72,9 +75,9 @@ class SlugBoxManagement {
         }
 
         $(document).on('click', '#edit-slug-box .save', () => {
-            let $slugField = $('#new-post-slug')
+            let $slugField = $(document).find('#new-post-slug')
             let name = $slugField.val()
-            let id = $('#slug_id').data('id')
+            let id = $slugId.data('id')
             if (id == null) {
                 id = 0
             }
@@ -99,4 +102,8 @@ class SlugBoxManagement {
 
 $(() => {
     new SlugBoxManagement().init()
+
+    document.addEventListener('core-init-resources', function() {
+        new SlugBoxManagement().init()
+    })
 })

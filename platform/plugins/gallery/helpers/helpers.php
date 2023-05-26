@@ -49,7 +49,7 @@ if (! function_exists('get_list_galleries')) {
 }
 
 if (! function_exists('render_object_gallery')) {
-    function render_object_gallery(array $galleries, ?string $category = null): string
+    function render_object_gallery(array $galleries, string|null $category = null): string
     {
         Theme::asset()
             ->container('footer')

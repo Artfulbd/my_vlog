@@ -66,8 +66,8 @@ export default {
         iframeUrl: String,
     },
     created() {
-        vueApp.eventBus.$on('assignInstalled', this.assignInstalled)
-        vueApp.eventBus.$on('assignActivated', this.assignActivated)
+        $event.on('assignInstalled', this.assignInstalled)
+        $event.on('assignActivated', this.assignActivated)
     },
     methods: {
         setProduct(data) {
@@ -89,12 +89,12 @@ export default {
         },
         install() {
             this.installing = true
-            vueApp.eventBus.$emit('install', this.product.id)
+            $event.emit('install', this.product.id)
         },
         changeStatus() {
             if (!this.activated) {
                 this.activating = true
-                vueApp.eventBus.$emit('changeStatus', this.pluginName)
+                $event.emit('changeStatus', this.pluginName)
             }
         },
         assignInstalled(name) {

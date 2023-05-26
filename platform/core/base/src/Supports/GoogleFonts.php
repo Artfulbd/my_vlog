@@ -45,7 +45,7 @@ class GoogleFonts
         }
     }
 
-    protected function loadLocal(string $url, ?string $nonce): ?Fonts
+    protected function loadLocal(string $url, string|null $nonce): ?Fonts
     {
         if (! $this->filesystem->exists($this->path($url, 'fonts.css'))) {
             return null;
@@ -67,10 +67,11 @@ class GoogleFonts
         );
     }
 
-    protected function fetch(string $url, ?string $nonce): Fonts
+    protected function fetch(string $url, string|null $nonce): Fonts
     {
         $css = Http::withHeaders(['User-Agent' => $this->userAgent])
             ->timeout(300)
+            ->withoutVerifying()
             ->get($url)
             ->body();
 
@@ -81,7 +82,7 @@ class GoogleFonts
 
             $this->filesystem->put(
                 $this->path($url, $localizedFontUrl),
-                Http::get($fontUrl)->body(),
+                Http::withoutVerifying()->get($fontUrl)->body(),
             );
 
             $localizedCss = str_replace(

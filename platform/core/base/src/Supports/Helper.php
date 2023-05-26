@@ -5,6 +5,7 @@ namespace Botble\Base\Supports;
 use Botble\Base\Models\BaseModel;
 use Exception;
 use Illuminate\Support\Arr;
+use Illuminate\Support\Facades\App;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Cache;
 use Illuminate\Support\Facades\Event;
@@ -74,7 +75,19 @@ class Helper
     public static function isConnectedDatabase(): bool
     {
         try {
-            return Schema::hasTable('settings');
+            if (App::runningInConsole()) {
+                return Schema::hasTable('settings');
+            }
+
+            if (Cache::get('cms_connected_to_database')) {
+                return true;
+            }
+
+            $connected = Schema::hasTable('settings');
+
+            Cache::set('cms_connected_to_database', $connected, 86400);
+
+            return $connected;
         } catch (Exception) {
             return false;
         }
@@ -104,7 +117,7 @@ class Helper
         return true;
     }
 
-    public static function getCountryNameByCode(?string $countryCode): ?string
+    public static function getCountryNameByCode(string|null $countryCode): string|null
     {
         if (empty($countryCode)) {
             return null;
@@ -113,7 +126,7 @@ class Helper
         return Arr::get(self::countries(), $countryCode, $countryCode);
     }
 
-    public static function getCountryCodeByName(?string $countryName): ?string
+    public static function getCountryCodeByName(string|null $countryName): string|null
     {
         if (empty($countryName)) {
             return null;
@@ -140,7 +153,9 @@ class Helper
         $defaultIpAddress = Request::ip() ?: '127.0.0.1';
 
         try {
-            return trim(Http::get('https://ipecho.net/plain')->body()) ?: $defaultIpAddress;
+            $ip = Http::withoutVerifying()->get('https://ipecho.net/plain')->body();
+
+            return trim($ip) ?: $defaultIpAddress;
         } catch (Throwable) {
             return $defaultIpAddress;
         }

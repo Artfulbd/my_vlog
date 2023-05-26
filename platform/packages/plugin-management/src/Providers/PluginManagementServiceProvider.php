@@ -43,17 +43,19 @@ class PluginManagementServiceProvider extends ServiceProvider
 
         $this->app->register(CommandServiceProvider::class);
 
-        $this->app['events']->listen(RouteMatched::class, function () {
-            DashboardMenu::registerItem([
-                'id' => 'cms-core-plugins',
-                'priority' => 997,
-                'parent_id' => null,
-                'name' => 'core/base::layouts.plugins',
-                'icon' => 'fa fa-plug',
-                'url' => route('plugins.index'),
-                'permissions' => ['plugins.index'],
-            ]);
-        });
+        if ($this->app['config']->get('packages.plugin-management.general.enable_plugin_manager', true)) {
+            $this->app['events']->listen(RouteMatched::class, function () {
+                DashboardMenu::registerItem([
+                    'id' => 'cms-core-plugins',
+                    'priority' => 997,
+                    'parent_id' => null,
+                    'name' => 'core/base::layouts.plugins',
+                    'icon' => 'fa fa-plug',
+                    'url' => route('plugins.index'),
+                    'permissions' => ['plugins.index'],
+                ]);
+            });
+        }
 
         $this->app->booted(function () {
             $this->app->register(HookServiceProvider::class);

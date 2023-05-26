@@ -16,9 +16,9 @@ class EmailHandler
 {
     protected string $type = 'plugins';
 
-    protected ?string $module = null;
+    protected string|null $module = null;
 
-    protected ?string $template = null;
+    protected string|null $template = null;
 
     protected array $templates = [];
 
@@ -52,12 +52,12 @@ class EmailHandler
         return $this;
     }
 
-    public function getTemplate(): ?string
+    public function getTemplate(): string|null
     {
         return $this->template;
     }
 
-    public function setTemplate(?string $template): self
+    public function setTemplate(string|null $template): self
     {
         $this->template = $template;
 
@@ -103,7 +103,7 @@ class EmailHandler
         return $this;
     }
 
-    public function getVariableValues(?string $module = null): array
+    public function getVariableValues(string|null $module = null): array
     {
         if ($module) {
             return Arr::get($this->variableValues, $module, []);
@@ -112,7 +112,7 @@ class EmailHandler
         return $this->variableValues;
     }
 
-    public function setVariableValues(array $data, ?string $module = null): self
+    public function setVariableValues(array $data, string|null $module = null): self
     {
         foreach ($data as $name => $value) {
             $this->variableValues[$module ?: $this->module][$name] = $value;
@@ -332,7 +332,7 @@ class EmailHandler
         return $exception->getAsString();
     }
 
-    public function getTemplateContent(string $template, string $type = 'plugins'): ?string
+    public function getTemplateContent(string $template, string $type = 'plugins'): string|null
     {
         $this->template = $template;
         $this->type = $type;

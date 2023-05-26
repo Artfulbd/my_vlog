@@ -108,7 +108,7 @@ class DashboardMenu
         return $this;
     }
 
-    public function hasItem(string $id, ?string $parentId = null): bool
+    public function hasItem(string $id, string|null $parentId = null): bool
     {
         if ($parentId) {
             if (! isset($this->links[$parentId])) {

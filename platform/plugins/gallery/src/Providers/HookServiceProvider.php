@@ -90,7 +90,7 @@ class HookServiceProvider extends ServiceProvider
         return (new GalleryService())->handleFrontRoutes($slug);
     }
 
-    public function addAdditionNameToPageName(?string $name, Page $page): ?string
+    public function addAdditionNameToPageName(string|null $name, Page $page): string|null
     {
         if ($page->id == theme_option('galleries_page_id')) {
             $subTitle = Html::tag(

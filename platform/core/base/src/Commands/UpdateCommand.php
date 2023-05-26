@@ -12,6 +12,7 @@ use Illuminate\Support\Composer;
 use Symfony\Component\Console\Attribute\AsCommand;
 use Symfony\Component\Console\Helper\ProgressBar;
 use Symfony\Component\Process\Process;
+use Throwable;
 
 #[AsCommand('cms:update', 'Update system to latest version')]
 class UpdateCommand extends Command
@@ -88,37 +89,44 @@ class UpdateCommand extends Command
         $progressBar->setBarWidth(50);
         $progressBar->start();
 
-        if (! $this->core->verifyLicense(true)) {
-            $this->errorWithNewLines('Your license is invalid. Please activate your license first.');
+        try {
+            if (! $this->core->verifyLicense(true)) {
+                $this->errorWithNewLines('Your license is invalid. Please activate your license first.');
+
+                return self::FAILURE;
+            }
+
+            $progressBar->setMessage('Downloading the latest update...');
+            $progressBar->advance();
+
+            if (! $this->core->downloadUpdate($updateId, $version)) {
+                $this->errorWithNewLines('Could not download updated file. Please check your license or your internet network.');
+
+                return self::FAILURE;
+            }
+
+            $progressBar->setMessage('Updating files and database...');
+            $progressBar->advance();
+
+            if (! $this->core->updateFilesAndDatabase($version)) {
+                $this->errorWithNewLines('Could not update files & database.');
+
+                return self::FAILURE;
+            }
+
+            $progressBar->setMessage('Publishing all assets...');
+            $progressBar->advance();
+            $this->core->publishUpdateAssets();
+
+            $progressBar->setMessage('Cleaning up the system...');
+            $progressBar->advance();
+            $this->core->cleanUpUpdate();
+        } catch (Throwable $exception) {
+            $this->errorWithNewLines($exception->getMessage());
+            $this->core->logError($exception);
 
             return self::FAILURE;
         }
-
-        $progressBar->setMessage('Downloading the latest update...');
-        $progressBar->advance();
-
-        if (! $this->core->downloadUpdate($updateId, $version)) {
-            $this->errorWithNewLines('Could not download updated file. Please check your license or your internet network.');
-
-            return self::FAILURE;
-        }
-
-        $progressBar->setMessage('Updating files and database...');
-        $progressBar->advance();
-
-        if (! $this->core->updateFilesAndDatabase($version)) {
-            $this->errorWithNewLines('Could not update files & database.');
-
-            return self::FAILURE;
-        }
-
-        $progressBar->setMessage('Publishing all assets...');
-        $progressBar->advance();
-        $this->core->publishUpdateAssets();
-
-        $progressBar->setMessage('Cleaning up the system...');
-        $progressBar->advance();
-        $this->core->cleanUpUpdate();
 
         $progressBar->setMessage('Done.');
         $progressBar->advance();

@@ -9,8 +9,6 @@ use Botble\Media\Facades\RvMedia;
 
 class ThumbnailService
 {
-    protected ImageManager $imageManager;
-
     protected string $imagePath;
 
     protected float $thumbRate;
@@ -29,18 +27,12 @@ class ThumbnailService
 
     protected string $fileName;
 
-    protected UploadsManager $uploadManager;
-
-    public function __construct(UploadsManager $uploadManager, ImageManager $imageManager)
+    public function __construct(protected UploadsManager $uploadManager, protected ImageManager $imageManager)
     {
         $this->thumbRate = 0.75;
         $this->xCoordinate = null;
         $this->yCoordinate = null;
         $this->fitPosition = 'center';
-
-        $this->imageManager = $imageManager;
-
-        $this->uploadManager = $uploadManager;
     }
 
     public function setImage(string $imagePath): self

@@ -130,7 +130,7 @@
                             <p class="text-center"><span class="search-text-bg">{{ __('Search') }}</span></p>
                             <form action="{{ is_plugin_active('blog') ? route('public.search') : '#' }}" class="search-header">
                                 <div class="input-group w-100">
-                                    <input type="text" name="q" class="form-control" placeholder="{{ __('Search post, project and topics') }}">
+                                    <input type="text" name="q" class="form-control" placeholder="{{ __('Search stories, places and people') }}">
                                     <div class="input-group-append">
                                         <button class="btn btn-search bg-white" type="submit">
                                             <i class="elegant-icon icon_search"></i>

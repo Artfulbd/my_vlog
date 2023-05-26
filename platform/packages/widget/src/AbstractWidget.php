@@ -18,7 +18,7 @@ abstract class AbstractWidget
 
     private string $backendTemplate = 'backend';
 
-    protected ?string $theme = null;
+    protected string|null $theme = null;
 
     protected array|Collection $data = [];
 
@@ -98,7 +98,7 @@ abstract class AbstractWidget
         return get_class($this);
     }
 
-    public function form(?string $sidebarId = null, int $position = 0): string|null
+    public function form(string|null $sidebarId = null, int $position = 0): string|null
     {
         Theme::uses(Theme::getThemeName());
 
@@ -141,7 +141,7 @@ abstract class AbstractWidget
 
     protected function data(): array|Collection
     {
-        return [];
+        return $this->data;
     }
 
     protected function setBackendTemplate(string $template): self

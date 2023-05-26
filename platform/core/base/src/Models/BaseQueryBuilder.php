@@ -10,7 +10,7 @@ use Illuminate\Database\Eloquent\Builder;
  */
 class BaseQueryBuilder extends Builder
 {
-    public function addSearch(string $column, ?string $term, bool $isPartial = true): BaseQueryBuilder
+    public function addSearch(string $column, string|null $term, bool $isPartial = true): BaseQueryBuilder
     {
         if (! $isPartial) {
             $this->orWhere($column, 'LIKE', '%' . trim($term) . '%');

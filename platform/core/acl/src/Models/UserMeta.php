@@ -29,7 +29,7 @@ class UserMeta extends BaseModel
         return $meta->update(['value' => $value]);
     }
 
-    public static function getMeta(string $key, $default = null, int|string $userId = 0): ?string
+    public static function getMeta(string $key, $default = null, int|string $userId = 0): string|null
     {
         if ($userId == 0) {
             $userId = Auth::id();

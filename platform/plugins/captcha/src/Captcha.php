@@ -9,7 +9,7 @@ class Captcha extends CaptchaContract
 {
     protected bool $rendered = false;
 
-    public function display(array $attributes = [], array $options = []): ?string
+    public function display(array $attributes = [], array $options = []): string|null
     {
         if (! $this->siteKey || ! $this->isEnabled()) {
             return null;
@@ -19,7 +19,7 @@ class Captcha extends CaptchaContract
 
         $isRendered = $this->rendered;
 
-        add_filter(THEME_FRONT_FOOTER, function (?string $html) use ($isRendered, $name): string {
+        add_filter(THEME_FRONT_FOOTER, function (string|null $html) use ($isRendered, $name): string {
             $url = self::RECAPTCHA_CLIENT_API_URL . '?' . http_build_query([
                     'onload' => 'onloadCallback',
                     'render' => 'explicit',
@@ -47,11 +47,13 @@ class Captcha extends CaptchaContract
             return false;
         }
 
-        $response = Http::asForm()->post(self::RECAPTCHA_VERIFY_API_URL, [
-            'secret' => $this->secretKey,
-            'response' => $response,
-            'remoteip' => $clientIp,
-        ]);
+        $response = Http::asForm()
+            ->withoutVerifying()
+            ->post(self::RECAPTCHA_VERIFY_API_URL, [
+                'secret' => $this->secretKey,
+                'response' => $response,
+                'remoteip' => $clientIp,
+            ]);
 
         return $response->json('success');
     }

@@ -2,11 +2,13 @@
 
 namespace Botble\ACL\Http\Controllers\Auth;
 
+use Botble\ACL\Http\Requests\ForgotPasswordRequest;
 use Botble\Base\Facades\Assets;
 use Botble\Base\Facades\PageTitle;
 use Botble\Base\Http\Controllers\BaseController;
 use Botble\Base\Http\Responses\BaseHttpResponse;
 use Botble\ACL\Traits\SendsPasswordResetEmails;
+use Botble\JsValidation\Facades\JsValidator;
 use Illuminate\Http\Request;
 
 class ForgotPasswordController extends BaseController
@@ -39,7 +41,9 @@ class ForgotPasswordController extends BaseController
                 'cookie',
             ]);
 
-        return view('core/acl::auth.forgot-password');
+        $jsValidator = JsValidator::formRequest(ForgotPasswordRequest::class);
+
+        return view('core/acl::auth.forgot-password', compact('jsValidator'));
     }
 
     protected function sendResetLinkResponse(Request $request, $response)

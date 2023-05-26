@@ -43,7 +43,7 @@ class PublicController extends Controller
         return Theme::scope('index')->render();
     }
 
-    public function getView(?string $key = null)
+    public function getView(string|null $key = null)
     {
         if (empty($key)) {
             return $this->getIndex();

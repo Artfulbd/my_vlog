@@ -20,5 +20,5 @@
 @stop
 
 @push('footer')
-    {!! JsValidator::formRequest(\Botble\ACL\Http\Requests\ForgotPasswordRequest::class) !!}
+    {!! $jsValidator !!}
 @endpush

@@ -7,7 +7,7 @@ use Illuminate\Support\Collection;
 use Illuminate\Support\Facades\File;
 
 if (! function_exists('setting')) {
-    function setting(?string $key = null, $default = null)
+    function setting(string|null $key = null, $default = null)
     {
         if (! empty($key)) {
             try {

@@ -7,16 +7,17 @@ use Botble\Base\Exceptions\MissingCURLExtensionException;
 use Botble\Base\Facades\BaseHelper;
 use Botble\Base\Supports\ValueObjects\ProductUpdate;
 use Botble\Menu\Facades\Menu;
+use Botble\PluginManagement\Services\PluginService;
 use Botble\Theme\Facades\Theme;
 use Botble\Theme\Services\ThemeService;
 use Carbon\Carbon;
+use Exception;
 use Illuminate\Contracts\Cache\Repository;
 use Illuminate\Contracts\Filesystem\FileNotFoundException;
 use Illuminate\Filesystem\Filesystem;
 use Illuminate\Http\Client\Response;
 use Illuminate\Support\Arr;
 use Illuminate\Support\Facades\Http;
-use Illuminate\Support\Facades\Request;
 use Illuminate\Support\Facades\Validator;
 use Illuminate\Support\Str;
 use Throwable;
@@ -234,11 +235,13 @@ final class Core
             'license_file' => $this->getLicenseFile(),
         ];
 
-        $version = str_replace('.', '_', $version);
+        $filePath = $this->getUpdatedFilePath($version);
 
-        $response = $this->createRequest('/api/download_update/main/' . $updateId, $data);
+        if (! $this->files->exists($filePath)) {
+            $response = $this->createRequest('/api/download_update/main/' . $updateId, $data);
 
-        $this->files->put($filePath = $this->basePath . '/update_main_' . $version . '.zip', $response->body());
+            $this->files->put($filePath, $response->body());
+        }
 
         if ($this->validateUpdateFile($filePath)) {
             return true;
@@ -249,11 +252,16 @@ final class Core
         return false;
     }
 
-    public function updateFilesAndDatabase(string $version): bool
+    private function getUpdatedFilePath(string $version): string
     {
         $version = str_replace('.', '_', $version);
 
-        $filePath = $this->basePath . '/update_main_' . $version . '.zip';
+        return $this->basePath . '/update_main_' . $version . '.zip';
+    }
+
+    public function updateFilesAndDatabase(string $version): bool
+    {
+        $filePath = $this->getUpdatedFilePath($version);
 
         if (! $this->files->exists($filePath)) {
             return false;
@@ -287,7 +295,7 @@ final class Core
                 $this->files->move($coreTempPath, $this->coreDataFilePath);
             }
 
-            logger()->error($exception->getMessage() . ' - ' . $exception->getFile() . ':' . $exception->getLine());
+            $this->logError($exception);
 
             throw $exception;
         }
@@ -298,7 +306,6 @@ final class Core
         $paths = [
             core_path(),
             package_path(),
-            plugin_path(),
         ];
 
         foreach ($paths as $path) {
@@ -319,17 +326,27 @@ final class Core
                     $this->files->makeDirectory($publishedPath, 0755, true);
                 }
 
-                if ($this->files->isDirectory($modulePath . '/public')) {
-                    $this->files->copyDirectory($modulePath . '/public', $publishedPath . '/' . $module);
+                if ($this->files->isDirectory($modulePublicPath = $modulePath . '/public')) {
+                    $this->files->copyDirectory($modulePublicPath, $publishedPath . '/' . $module);
                 }
 
-                if ($this->files->isDirectory($modulePath . '/resources/lang')) {
+                if ($this->files->isDirectory($moduleLangPath = $modulePath . '/resources/lang')) {
                     $this->files->copyDirectory(
-                        $modulePath . '/resources/lang',
+                        $moduleLangPath,
                         lang_path('vendor') . '/' . $this->files->basename($path) . '/' . $module
                     );
                 }
             }
+        }
+
+        $pluginService = app(PluginService::class);
+
+        foreach (BaseHelper::scanFolder(plugin_path()) as $plugin) {
+            if ($path == plugin_path() && ! is_plugin_active($plugin)) {
+                continue;
+            }
+
+            $pluginService->publishAssets($plugin);
         }
 
         $this->files->delete(theme_path(Theme::getThemeName() . '/public/css/style.integration.css'));
@@ -366,8 +383,13 @@ final class Core
                 $this->files->delete($view);
             }
         } catch (Throwable $exception) {
-            logger()->error($exception->getMessage() . ' - ' . $exception->getFile() . ':' . $exception->getLine());
+            $this->logError($exception);
         }
+    }
+
+    public function logError(Exception|Throwable $exception): void
+    {
+        logger()->error($exception->getMessage() . ' - ' . $exception->getFile() . ':' . $exception->getLine());
     }
 
     private function runMigrationFiles(): void
@@ -394,8 +416,8 @@ final class Core
                     continue;
                 }
 
-                if ($this->files->isDirectory($modulePath . '/database/migrations')) {
-                    $migrator->run($modulePath . '/database/migrations');
+                if ($this->files->isDirectory($moduleMigrationPath = $modulePath . '/database/migrations')) {
+                    $migrator->run($moduleMigrationPath);
                 }
             }
         }
@@ -421,12 +443,15 @@ final class Core
             }
 
             $validator = Validator::make($content, [
-                'productId' => ['required'],
-                'source' => ['required'],
-                'apiUrl' => ['required'],
-                'apiKey' => ['required'],
-                'version' => ['required'],
-            ]);
+                'productId' => ['required', 'string'],
+                'source' => ['required', 'string'],
+                'apiUrl' => ['required', 'url'],
+                'apiKey' => ['required', 'string'],
+                'version' => ['required', 'string'],
+                'marketplaceUrl' => ['required', 'url'],
+                'marketplaceToken' => ['required', 'string'],
+                'minimumPhpVersion' => ['nullable', 'string'],
+            ])->stopOnFirstFailure();
 
             if ($validator->fails()) {
                 $zip->close();
@@ -443,6 +468,12 @@ final class Core
             }
 
             if (version_compare($content['version'], $this->version, '<')) {
+                $zip->close();
+
+                return false;
+            }
+
+            if (isset($content['minimumPhpVersion']) && version_compare($content['minimumPhpVersion'], phpversion(), '>')) {
                 $zip->close();
 
                 return false;
@@ -478,23 +509,20 @@ final class Core
             throw new MissingCURLExtensionException();
         }
 
-        $method = Str::upper($method);
-        $request = Http::withHeaders([
-            'Content-Type' => 'application/json',
-            'Accept' => 'application/json',
-            'LB-API-KEY' => $this->licenseKey,
-            'LB-URL' => rtrim(url('/'), '/'),
-            'LB-IP' => $this->getClientIpAddress(),
-            'LB-LANG' => 'english',
-        ])
-            ->withOptions([
-                'verify' => false,
-                'connect_timeout' => 100,
-                'timeout' => 300,
+        $request = Http::baseUrl($this->licenseUrl)
+            ->withHeaders([
+                'LB-API-KEY' => $this->licenseKey,
+                'LB-URL' => rtrim(url('/'), '/'),
+                'LB-IP' => $this->getClientIpAddress(),
+                'LB-LANG' => 'english',
             ])
-            ->baseUrl($this->licenseUrl);
+            ->asJson()
+            ->acceptJson()
+            ->withoutVerifying()
+            ->connectTimeout(100)
+            ->timeout(300);
 
-        return match ($method) {
+        return match (Str::upper($method)) {
             'GET' => $request->get($path, $data),
             'HEAD' => $request->head($path),
             default => $request->post($path, $data)
@@ -503,13 +531,7 @@ final class Core
 
     private function getClientIpAddress(): string
     {
-        $defaultIpAddress = Request::ip() ?: '127.0.0.1';
-
-        try {
-            return trim(Http::get('https://ipecho.net/plain')->body()) ?: $defaultIpAddress;
-        } catch (Throwable) {
-            return $defaultIpAddress;
-        }
+        return Helper::getIpFromThirdParty();
     }
 
     private function parseProductUpdateResponse(Response $response): ProductUpdate|false

@@ -71,18 +71,13 @@ class ThemeTranslationTable extends TableAbstract
         return $this;
     }
 
-    protected function formatKeyAndValue(?string $value): ?string
+    protected function formatKeyAndValue(string|null $value): string|null
     {
         return htmlentities($value, ENT_QUOTES, 'UTF-8', false);
     }
 
-    public function htmlDrawCallbackFunction(): ?string
+    public function htmlDrawCallbackFunction(): string|null
     {
         return parent::htmlDrawCallbackFunction() . '$(".editable").editable({mode: "inline"});';
-    }
-
-    protected function getDom(): ?string
-    {
-        return $this->simpleDom();
     }
 }

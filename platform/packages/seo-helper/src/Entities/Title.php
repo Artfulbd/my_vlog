@@ -10,7 +10,7 @@ use Illuminate\Support\Str;
 
 class Title implements TitleContract
 {
-    protected ?string $title = '';
+    protected string|null $title = '';
 
     protected string $siteName = '';
 
@@ -37,12 +37,12 @@ class Title implements TitleContract
         $this->setMax(config('packages.seo-helper.general.title.max', 55));
     }
 
-    public function getTitleOnly(): ?string
+    public function getTitleOnly(): string|null
     {
         return $this->title;
     }
 
-    public function set(?string $title): static
+    public function set(string|null $title): static
     {
         $this->title = $title;
 

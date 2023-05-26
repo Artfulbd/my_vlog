@@ -85,7 +85,13 @@ class JsValidatorFactory
 
         $rules = method_exists($formRequest, 'rules') ? $formRequest->rules() : [];
 
-        $validator = $this->getValidatorInstance($rules, $formRequest->messages(), $formRequest->attributes());
+        $rules = apply_filters('core_request_rules', $rules, $formRequest);
+
+        $messages = apply_filters('core_request_messages', $formRequest->messages(), $formRequest);
+
+        $attributes = apply_filters('core_request_attributes', $formRequest->attributes(), $formRequest);
+
+        $validator = $this->getValidatorInstance($rules, $messages, $attributes);
 
         return $this->validator($validator, $selector);
     }
@@ -156,7 +162,7 @@ class JsValidatorFactory
     /**
      * Get and encrypt token from session store.
      */
-    protected function getSessionToken(): ?string
+    protected function getSessionToken(): string|null
     {
         $token = null;
         if ($session = $this->app->__get('session')) {

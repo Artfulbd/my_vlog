@@ -4,6 +4,11 @@
     $attributes['placeholder'] = $attributes['data-date-format'];
     $attributes['data-input'] = '';
     $attributes['readonly'] = $attributes['readonly'] ?? 'readonly';
+
+    if (App::getLocale() != 'en') {
+        Assets::addScriptsDirectly('https://npmcdn.com/flatpickr@4.6.13/dist/l10n/index.js');
+    }
+
 @endphp
 <div class="input-group datepicker">
     {!! Form::text($name, $value, $attributes) !!}

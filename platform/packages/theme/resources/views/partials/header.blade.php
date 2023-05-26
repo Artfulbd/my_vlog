@@ -8,6 +8,8 @@
     {!! Theme::get('headerMeta') !!}
 @endif
 
+{!! apply_filters('theme_front_meta', null) !!}
+
 <script type="application/ld+json">
 {
   "@context": "https://schema.org",

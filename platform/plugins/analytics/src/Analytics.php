@@ -6,6 +6,7 @@ use Botble\Analytics\Abstracts\AnalyticsAbstract;
 use Botble\Analytics\Abstracts\AnalyticsContract;
 use Google\Service\Analytics\GaData;
 use Google_Service_Analytics;
+use Illuminate\Support\Arr;
 use Illuminate\Support\Collection;
 
 class Analytics extends AnalyticsAbstract implements AnalyticsContract
@@ -80,12 +81,14 @@ class Analytics extends AnalyticsAbstract implements AnalyticsContract
             ]
         );
 
-        return collect($response->rows ?? [])->map(function (array $userRow) {
+        $data = Arr::map($response->rows ?? [], function (array $userRow) {
             return [
                 'type' => $userRow[0],
                 'sessions' => (int)$userRow[1],
             ];
         });
+
+        return collect($data);
     }
 
     public function fetchTopBrowsers(Period $period, int $maxResults = 10): Collection

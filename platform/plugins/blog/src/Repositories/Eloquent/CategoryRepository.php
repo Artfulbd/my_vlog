@@ -23,7 +23,7 @@ class CategoryRepository extends RepositoriesAbstract implements CategoryInterfa
         return $this->applyBeforeExecuteQuery($data)->get();
     }
 
-    public function getFeaturedCategories(?int $limit, array $with = []): Collection
+    public function getFeaturedCategories(int|null $limit, array $with = []): Collection
     {
         $data = $this->model
             ->with(array_merge(['slugable'], $with))

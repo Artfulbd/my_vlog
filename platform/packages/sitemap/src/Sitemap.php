@@ -41,7 +41,7 @@ class Sitemap
         $this->model = new Model($config);
     }
 
-    public function setCache(?string $key = null, $duration = null, bool $useCache = true): void
+    public function setCache(string|null $key = null, $duration = null, bool $useCache = true): void
     {
         $this->model->setUseCache($useCache);
 
@@ -324,8 +324,8 @@ class Sitemap
     public function store(
         string $format = 'xml',
         string $filename = 'sitemap',
-        ?string $path = null,
-        ?string $style = null
+        string|null $path = null,
+        string|null $style = null
     ) {
         // turn off caching for this method
         $this->model->setUseCache(false);
@@ -425,7 +425,7 @@ class Sitemap
     /**
      * Add new sitemap to $sitemaps array.
      */
-    public function addSitemap(string $loc, ?string $lastMod = null): void
+    public function addSitemap(string $loc, string|null $lastMod = null): void
     {
         $this->model->setSitemaps([
             'loc' => $loc,

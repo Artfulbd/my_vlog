@@ -16,11 +16,11 @@ class BaseHttpResponse extends Response implements Responsable
 
     protected mixed $data = null;
 
-    protected ?string $message = null;
+    protected string|null $message = null;
 
-    protected ?string $previousUrl = '';
+    protected string|null $previousUrl = '';
 
-    protected ?string $nextUrl = '';
+    protected string|null $nextUrl = '';
 
     protected bool $withInput = false;
 
@@ -74,7 +74,7 @@ class BaseHttpResponse extends Response implements Responsable
         return $this->message;
     }
 
-    public function setMessage(?string $message): self
+    public function setMessage(string|null $message): self
     {
         $this->message = BaseHelper::clean($message);
 

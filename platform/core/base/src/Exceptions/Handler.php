@@ -122,9 +122,12 @@ class Handler extends ExceptionHandler
                             'Request URL' => request()->fullUrl(),
                             'Request IP' => request()->ip(),
                             'Request Method' => request()->method(),
+                            'Request Form Data' => request()->method() != 'GET' ? BaseHelper::jsonEncodePrettify(request()->input()) : null,
                             'Exception Type' => get_class($e),
                             'File Path' => ltrim(str_replace(base_path(), '', $e->getFile()), '/') . ':' .
                                 $e->getLine(),
+                            'Previous File Path' => ltrim(str_replace(base_path(), '', $e->getPrevious()->getFile()), '/') . ':' .
+                                $e->getPrevious()->getLine(),
                         ]
                     );
                 }

@@ -2,10 +2,10 @@
 
 namespace Botble\Api\Http\Controllers;
 
+use Botble\Api\Http\Requests\ApiSettingRequest;
 use Botble\Base\Facades\Assets;
 use Botble\Base\Facades\PageTitle;
 use Botble\Base\Http\Responses\BaseHttpResponse;
-use Illuminate\Http\Request;
 use Illuminate\Routing\Controller;
 
 class ApiController extends Controller
@@ -20,7 +20,7 @@ class ApiController extends Controller
         return view('packages/api::settings');
     }
 
-    public function storeSettings(Request $request, BaseHttpResponse $response)
+    public function storeSettings(ApiSettingRequest $request, BaseHttpResponse $response)
     {
         $this->saveSettings($request->except([
             '_token',

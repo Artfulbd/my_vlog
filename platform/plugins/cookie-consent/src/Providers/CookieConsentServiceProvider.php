@@ -205,8 +205,12 @@ class CookieConsentServiceProvider extends ServiceProvider
             ]);
     }
 
-    public function registerCookieConsent(?string $html): string
+    public function registerCookieConsent(string|null $html): string
     {
+        if (is_in_admin()) {
+            return $html;
+        }
+
         return $html . view('plugins/cookie-consent::index')->render();
     }
 }

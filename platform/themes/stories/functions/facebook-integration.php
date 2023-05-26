@@ -1,11 +1,10 @@
 <?php
 
-use Botble\Theme\Facades\Theme;
 use Botble\Base\Facades\Html;
+use Botble\Theme\Facades\Theme;
 use Illuminate\Support\Arr;
 
 app()->booted(function () {
-    // Facebook integration
     theme_option()
         ->setSection([
             'title' => __('Facebook Integration'),
@@ -34,7 +33,11 @@ app()->booted(function () {
                 'To show chat box on that website, please go to :link and add :domain to whitelist domains!',
                 [
                     'domain' => Html::link(url('')),
-                    'link' => Html::link('https://www.facebook.com/' . theme_option('facebook_page_id') . '/settings/?tab=messenger_platform'),
+                    'link' => Html::link(
+                        'https://www.facebook.com/' . theme_option(
+                            'facebook_page_id'
+                        ) . '/settings/?tab=messenger_platform'
+                    ),
                 ]
             ),
         ])
@@ -119,7 +122,7 @@ app()->booted(function () {
             ),
         ]);
 
-    add_filter(THEME_FRONT_HEADER, function ($html) {
+    add_filter(THEME_FRONT_HEADER, function (?string $html): ?string {
         if (theme_option('facebook_app_id')) {
             $html .= Html::meta('', theme_option('facebook_app_id'), ['property' => 'fb:app_id'])->toHtml();
         }
@@ -133,10 +136,14 @@ app()->booted(function () {
             }
         }
 
+        if (theme_option('facebook_chat_enabled', 'no') == 'yes' && theme_option('facebook_page_id')) {
+            $html .= '<link href="//connect.facebook.net" rel="dns-prefetch" />';
+        }
+
         return $html;
     }, 1180);
 
-    add_filter(THEME_FRONT_FOOTER, function ($html) {
+    add_filter(THEME_FRONT_FOOTER, function (?string $html): string {
         return $html . Theme::partial('facebook-integration');
     }, 1180);
 });

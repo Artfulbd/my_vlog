@@ -48,7 +48,7 @@ class JavascriptValidator implements Arrayable
      * @param ValidatorHandler $validator
      * @param array $options
      */
-    public function __construct(ValidatorHandler $validator, $options = [])
+    public function __construct(ValidatorHandler $validator, array $options = [])
     {
         $this->validator = $validator;
         $this->setDefaults($options);

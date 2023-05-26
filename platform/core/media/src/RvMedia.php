@@ -71,7 +71,7 @@ class RvMedia
         return view('core/media::content')->render();
     }
 
-    public function responseSuccess(array $data, ?string $message = null): JsonResponse
+    public function responseSuccess(array $data, string|null $message = null): JsonResponse
     {
         return response()->json([
             'error' => false,
@@ -80,8 +80,12 @@ class RvMedia
         ]);
     }
 
-    public function responseError(string $message, array $data = [], ?int $code = null, int $status = 200): JsonResponse
-    {
+    public function responseError(
+        string $message,
+        array $data = [],
+        int|null $code = null,
+        int $status = 200
+    ): JsonResponse {
         return response()->json([
             'error' => true,
             'message' => $message,
@@ -90,7 +94,7 @@ class RvMedia
         ], $status);
     }
 
-    public function getAllImageSizes(?string $url): array
+    public function getAllImageSizes(string|null $url): array
     {
         $images = [];
         foreach ($this->getSizes() as $size) {
@@ -128,8 +132,12 @@ class RvMedia
         return $sizes;
     }
 
-    public function getImageUrl(?string $url, $size = null, bool $relativePath = false, $default = null): string|null
-    {
+    public function getImageUrl(
+        string|null $url,
+        $size = null,
+        bool $relativePath = false,
+        $default = null
+    ): string|null {
         if (empty($url)) {
             return $default;
         }
@@ -173,7 +181,7 @@ class RvMedia
         return $this->url($url);
     }
 
-    public function url(?string $path): string
+    public function url(string|null $path): string
     {
         $path = trim($path);
 
@@ -209,7 +217,7 @@ class RvMedia
         return $default ? url($default) : $default;
     }
 
-    public function getSize(string $name): ?string
+    public function getSize(string $name): string|null
     {
         return Arr::get($this->getSizes(), $name);
     }
@@ -330,8 +338,10 @@ class RvMedia
                 ]);
             }
 
-            return response('<script>window.parent.CKEDITOR.tools.callFunction("' . $request->input('CKEditorFuncNum') .
-                '", "' . $this->url($file->url) . '", "");</script>')
+            return response(
+                '<script>window.parent.CKEDITOR.tools.callFunction("' . $request->input('CKEditorFuncNum') .
+                '", "' . $this->url($file->url) . '", "");</script>'
+            )
                 ->header('Content-Type', 'text/html');
         }
 
@@ -342,7 +352,7 @@ class RvMedia
     public function handleUpload(
         ?UploadedFile $fileUpload,
         int|string|null $folderId = 0,
-        ?string $folderSlug = null,
+        string|null $folderSlug = null,
         bool $skipValidation = false
     ): array {
         $request = request();
@@ -579,10 +589,13 @@ class RvMedia
 
         // 10% less than an actual image (play with this value)
         // Watermark will be 10 less than the actual width of the image
-        $watermarkSize = (int)round($imageSource->width() * ((int)setting(
-            'media_watermark_size',
-            $this->getConfig('watermark.size')
-        ) / 100), 2);
+        $watermarkSize = (int)round(
+            $imageSource->width() * ((int)setting(
+                'media_watermark_size',
+                $this->getConfig('watermark.size')
+            ) / 100),
+            2
+        );
 
         // Resize watermark width keep height auto
         $watermark
@@ -609,7 +622,7 @@ class RvMedia
         return true;
     }
 
-    public function getRealPath(?string $url): string
+    public function getRealPath(string|null $url): string
     {
         $path = match (config('filesystems.default')) {
             'local', 'public' => Storage::path($url),
@@ -632,9 +645,9 @@ class RvMedia
     public function uploadFromUrl(
         string $url,
         int|string $folderId = 0,
-        ?string $folderSlug = null,
-        ?string $defaultMimetype = null
-    ): ?array {
+        string|null $folderSlug = null,
+        string|null $defaultMimetype = null
+    ): array|null {
         if (empty($url)) {
             return [
                 'error' => true,
@@ -691,8 +704,8 @@ class RvMedia
     public function uploadFromPath(
         string $path,
         int|string $folderId = 0,
-        ?string $folderSlug = null,
-        ?string $defaultMimetype = null
+        string|null $folderSlug = null,
+        string|null $defaultMimetype = null
     ): array {
         if (empty($path)) {
             return [
@@ -740,7 +753,7 @@ class RvMedia
         }, 124);
     }
 
-    public function getMimeType(string $url): ?string
+    public function getMimeType(string $url): string|null
     {
         if (! $url) {
             return null;
@@ -751,7 +764,7 @@ class RvMedia
         return $mimeTypeDetection->getMimeType(File::extension($url));
     }
 
-    public function canGenerateThumbnails(?string $mimeType): bool
+    public function canGenerateThumbnails(string|null $mimeType): bool
     {
         if (! $this->getConfig('generate_thumbnails_enabled')) {
             return false;
@@ -801,7 +814,7 @@ class RvMedia
         return (int)$this->getConfig('chunk.enabled') == 1;
     }
 
-    public function getConfig(?string $key = null, string|null|array $default = null)
+    public function getConfig(string|null $key = null, string|null|array $default = null)
     {
         $configs = config('core.media.media');
 
@@ -829,35 +842,46 @@ class RvMedia
 
     public function getMediaDriver(): string
     {
-        $driverName = setting('media_driver', 'public');
-        $driver = config("filesystems.disks.$driverName");
-
-        return $driver ? $driverName : 'public';
+        return setting('media_driver', 'public');
     }
 
     public function setS3Disk(array $config): void
     {
-        if (Arr::has($config, ['key', 'secret', 'region', 'bucket', 'url', 'endpoint', 'use_path_style_endpoint'])) {
-            config()->set([
-                'filesystems.disks.s3' => [
-                    'driver' => 's3',
-                    'visibility' => 'public',
-                    'throw' => true,
-                    'key' => $config['key'],
-                    'secret' => $config['secret'],
-                    'region' => $config['region'],
-                    'bucket' => $config['bucket'],
-                    'url' => $config['url'],
-                    'endpoint' => $config['endpoint'],
-                    'use_path_style_endpoint' => $config['use_path_style_endpoint'],
-                ],
-            ]);
+        if (
+            ! $config['key'] ||
+            ! $config['secret'] ||
+            ! $config['region'] ||
+            ! $config['bucket'] ||
+            ! $config['url']
+        ) {
+            return;
         }
+
+        config()->set([
+            'filesystems.disks.s3' => [
+                'driver' => 's3',
+                'visibility' => 'public',
+                'throw' => true,
+                'key' => $config['key'],
+                'secret' => $config['secret'],
+                'region' => $config['region'],
+                'bucket' => $config['bucket'],
+                'url' => $config['url'],
+                'endpoint' => $config['endpoint'],
+                'use_path_style_endpoint' => $config['use_path_style_endpoint'],
+            ],
+        ]);
     }
 
     public function setDoSpacesDisk(array $config): void
     {
-        if (! $config['key'] || ! $config['secret'] || ! $config['region'] || ! $config['bucket'] || ! $config['endpoint']) {
+        if (
+            ! $config['key'] ||
+            ! $config['secret'] ||
+            ! $config['region'] ||
+            ! $config['bucket'] ||
+            ! $config['endpoint']
+        ) {
             return;
         }
 
@@ -877,7 +901,12 @@ class RvMedia
 
     public function setWasabiDisk(array $config): void
     {
-        if (! $config['key'] || ! $config['secret'] || ! $config['region'] || ! $config['bucket'] || ! $config['root']) {
+        if (
+            ! $config['key'] ||
+            ! $config['secret'] ||
+            ! $config['region'] ||
+            ! $config['bucket']
+        ) {
             return;
         }
 
@@ -890,25 +919,29 @@ class RvMedia
                 'secret' => $config['secret'],
                 'region' => $config['region'],
                 'bucket' => $config['bucket'],
-                'root' => $config['root'],
+                'root' => $config['root'] ?: '/',
             ],
         ]);
     }
 
     public function setBunnyCdnDisk(array $config): void
     {
-        if (! $config['hostname'] || ! $config['storage_zone'] || ! $config['url'] || ! $config['api_key'] || ! $config['region']) {
+        if (
+            ! $config['hostname'] ||
+            ! $config['storage_zone'] ||
+            ! $config['api_key'] ||
+            ! $config['region']
+        ) {
             return;
         }
 
         config()->set([
-            'filesystems.disks.bunny' => [
+            'filesystems.disks.bunnycdn' => [
                 'driver' => 'bunnycdn',
                 'visibility' => 'public',
                 'throw' => true,
                 'hostname' => $config['hostname'],
                 'storage_zone' => $config['storage_zone'],
-                'url' => $config['url'],
                 'api_key' => $config['api_key'],
                 'region' => $config['region'],
             ],

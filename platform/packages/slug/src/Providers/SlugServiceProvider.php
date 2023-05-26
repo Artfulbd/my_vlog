@@ -3,6 +3,8 @@
 namespace Botble\Slug\Providers;
 
 use Botble\Base\Facades\BaseHelper;
+use Botble\Base\Facades\DashboardMenu;
+use Botble\Base\Facades\MacroableModels;
 use Botble\Base\Models\BaseModel;
 use Botble\Base\Traits\LoadAndPublishDataTrait;
 use Botble\Page\Models\Page;
@@ -11,11 +13,10 @@ use Botble\Slug\Models\Slug;
 use Botble\Slug\Repositories\Caches\SlugCacheDecorator;
 use Botble\Slug\Repositories\Eloquent\SlugRepository;
 use Botble\Slug\Repositories\Interfaces\SlugInterface;
-use Botble\Slug\SlugHelper;
 use Botble\Slug\SlugCompiler;
+use Botble\Slug\SlugHelper;
 use Illuminate\Routing\Events\RouteMatched;
 use Illuminate\Support\ServiceProvider;
-use Botble\Base\Facades\MacroableModels;
 
 class SlugServiceProvider extends ServiceProvider
 {
@@ -51,16 +52,15 @@ class SlugServiceProvider extends ServiceProvider
         $this->app->register(CommandServiceProvider::class);
 
         $this->app['events']->listen(RouteMatched::class, function () {
-            dashboard_menu()
-                ->registerItem([
-                    'id' => 'cms-packages-slug-permalink',
-                    'priority' => 5,
-                    'parent_id' => 'cms-core-settings',
-                    'name' => 'packages/slug::slug.permalink_settings',
-                    'icon' => null,
-                    'url' => route('slug.settings'),
-                    'permissions' => ['setting.options'],
-                ]);
+            DashboardMenu::registerItem([
+                'id' => 'cms-packages-slug-permalink',
+                'priority' => 5,
+                'parent_id' => 'cms-core-settings',
+                'name' => 'packages/slug::slug.permalink_settings',
+                'icon' => null,
+                'url' => route('slug.settings'),
+                'permissions' => ['setting.options'],
+            ]);
         });
 
         $this->app->booted(function () {

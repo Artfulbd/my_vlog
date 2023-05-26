@@ -2,9 +2,9 @@
 
 namespace Botble\ACL\Traits;
 
+use Illuminate\Contracts\Auth\Authenticatable;
 use Illuminate\Contracts\Auth\StatefulGuard;
 use Illuminate\Contracts\Foundation\Application;
-use Illuminate\Contracts\View\Factory;
 use Illuminate\Contracts\View\View;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
@@ -18,25 +18,12 @@ trait AuthenticatesUsers
     use RedirectsUsers;
     use ThrottlesLogins;
 
-    /**
-     * Show the application's login form.
-     *
-     * @return Factory|Application|View|\Response
-     */
-    public function showLoginForm()
+    public function showLoginForm(): View|null
     {
         return null;
     }
 
-    /**
-     * Handle a login request to the application.
-     *
-     * @param Request $request
-     * @return \Symfony\Component\HttpFoundation\Response|void
-     *
-     * @throws ValidationException
-     */
-    public function login(Request $request)
+    public function login(Request $request): Response|RedirectResponse
     {
         $this->validateLogin($request);
 
@@ -93,13 +80,7 @@ trait AuthenticatesUsers
         return $request->only($this->username(), 'password');
     }
 
-    /**
-     * Send the response after the user was authenticated.
-     *
-     * @param Request $request
-     * @return RedirectResponse|Response
-     */
-    protected function sendLoginResponse(Request $request)
+    protected function sendLoginResponse(Request $request): Response|RedirectResponse
     {
         $request->session()->regenerate();
 
@@ -112,23 +93,11 @@ trait AuthenticatesUsers
             : redirect()->intended($this->redirectPath());
     }
 
-    /**
-     * The user has been authenticated.
-     *
-     * @param Request $request
-     * @param mixed $user
-     * @return void
-     */
-    protected function authenticated(Request $request, $user)
+    protected function authenticated(Request $request, Authenticatable $user)
     {
         //
     }
 
-    /**
-     * Get the failed login response instance.
-     *
-     * @throws ValidationException
-     */
     protected function sendFailedLoginResponse()
     {
         throw ValidationException::withMessages([
@@ -136,13 +105,7 @@ trait AuthenticatesUsers
         ]);
     }
 
-    /**
-     * Log the user out of the application.
-     *
-     * @param Request $request
-     * @return RedirectResponse|Response|Redirector
-     */
-    public function logout(Request $request)
+    public function logout(Request $request): Response|Redirector|RedirectResponse|Application
     {
         $this->guard()->logout();
 
@@ -157,12 +120,6 @@ trait AuthenticatesUsers
             : redirect('/');
     }
 
-    /**
-     * The user has logged out of the application.
-     *
-     * @param Request $request
-     * @return void
-     */
     protected function loggedOut(Request $request)
     {
         //

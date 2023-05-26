@@ -2,7 +2,7 @@
 
 namespace Botble\Base\Services;
 
-use Botble\Setting\Models\Setting;
+use Botble\Setting\Facades\Setting;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\File;
 use Illuminate\Support\Facades\Schema;
@@ -49,14 +49,12 @@ class CleanDatabaseService
 
         Schema::enableForeignKeyConstraints();
 
-        Setting::query()
-            ->whereNotIn('key', [
-                'theme',
-                'activated_plugins',
-                'licensed_to',
-                'media_random_hash',
-            ])
-            ->delete();
+        Setting::delete(except: [
+            'theme',
+            'activated_plugins',
+            'licensed_to',
+            'media_random_hash',
+        ]);
 
         File::cleanDirectory(Storage::disk()->path(''));
 

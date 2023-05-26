@@ -33,7 +33,7 @@ class MediaFileRepository extends RepositoriesAbstract implements MediaFileInter
         return $name;
     }
 
-    protected function checkIfExistsName(?string $name, int|string|null $folder): bool
+    protected function checkIfExistsName(string|null $name, int|string|null $folder): bool
     {
         $count = $this->model
             ->where('name', $name)

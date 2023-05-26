@@ -2,11 +2,13 @@
 
 namespace Botble\ACL\Http\Controllers\Auth;
 
+use Botble\ACL\Http\Requests\ResetPasswordRequest;
 use Botble\Base\Facades\Assets;
 use Botble\Base\Facades\BaseHelper;
 use Botble\ACL\Traits\ResetsPasswords;
 use Botble\Base\Facades\PageTitle;
 use Botble\Base\Http\Controllers\BaseController;
+use Botble\JsValidation\Facades\JsValidator;
 use Illuminate\Http\Request;
 
 class ResetPasswordController extends BaseController
@@ -44,6 +46,8 @@ class ResetPasswordController extends BaseController
 
         $email = $request->input('email');
 
-        return view('core/acl::auth.reset', compact('email', 'token'));
+        $jsValidator = JsValidator::formRequest(ResetPasswordRequest::class);
+
+        return view('core/acl::auth.reset', compact('email', 'token', 'jsValidator'));
     }
 }

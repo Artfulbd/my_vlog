@@ -32,42 +32,42 @@ Route::group(['namespace' => 'Botble\PluginManagement\Http\Controllers', 'middle
             ]);
         });
 
-        Route::group(['prefix' => 'plugins/marketplace'], function () {
+        Route::group(['prefix' => 'plugins/marketplace', 'permission' => 'plugins.marketplace'], function () {
             Route::get('', [
                 'as' => 'plugins.marketplace',
                 'uses' => 'MarketplaceController@index',
             ]);
 
-            Route::group(['prefix' => 'ajax'], function () {
+            Route::group(['prefix' => 'ajax', 'as' => 'plugins.marketplace.ajax.'], function () {
                 Route::get('plugins', [
-                    'as' => 'plugins.marketplace.ajax.list',
+                    'as' => 'list',
                     'uses' => 'MarketplaceController@list',
                 ]);
 
                 Route::get('{id}', [
-                    'as' => 'plugins.marketplace.ajax.detail',
+                    'as' => 'detail',
                     'uses' => 'MarketplaceController@detail',
                 ]);
 
                 Route::get('{id}/iframe', [
-                    'as' => 'plugins.marketplace.ajax.iframe',
+                    'as' => 'iframe',
                     'uses' => 'MarketplaceController@iframe',
                 ]);
 
                 Route::post('{id}/install', [
-                    'as' => 'plugins.marketplace.ajax.install',
+                    'as' => 'install',
                     'uses' => 'MarketplaceController@install',
                     'middleware' => 'preventDemo',
                 ]);
 
                 Route::post('{id}/update', [
-                    'as' => 'plugins.marketplace.ajax.update',
+                    'as' => 'update',
                     'uses' => 'MarketplaceController@update',
                     'middleware' => 'preventDemo',
                 ]);
 
-                Route::post('/check-update', [
-                    'as' => 'plugins.marketplace.ajax.check-update',
+                Route::post('check-update', [
+                    'as' => 'check-update',
                     'uses' => 'MarketplaceController@checkUpdate',
                 ]);
             });

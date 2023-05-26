@@ -16,7 +16,7 @@ use Botble\Widget\Facades\WidgetGroup;
 
 class WidgetController extends BaseController
 {
-    protected ?string $theme = null;
+    protected string|null $theme = null;
 
     public function __construct(protected WidgetInterface $widgetRepository)
     {
@@ -100,7 +100,7 @@ class WidgetController extends BaseController
         }
     }
 
-    protected function getCurrentLocaleCode(): ?string
+    protected function getCurrentLocaleCode(): string|null
     {
         $languageCode = null;
         if (is_plugin_active('language')) {

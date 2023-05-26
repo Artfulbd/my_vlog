@@ -16,7 +16,7 @@ abstract class Captcha
 
     abstract public function verify(string $response, string $clientIp, array $options = []): bool;
 
-    abstract public function display(array $attributes = [], array $options = []): ?string;
+    abstract public function display(array $attributes = [], array $options = []): string|null;
 
     public function rules(): array
     {
